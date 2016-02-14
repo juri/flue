@@ -8,16 +8,26 @@
 
 import Foundation
 
-private func parseInt(name: String, value: String) throws -> Int? {
-    let fmt = NSNumberFormatter()
-    fmt.locale = NSLocale(localeIdentifier: "POSIX")
-    fmt.maximumFractionDigits = 0
+class ValueParser {
+    private let integerFormatter: NSNumberFormatter
 
-    let nopt = fmt.numberFromString(value).map {$0 as Int}
-    guard let n = nopt else {
-        throw ExtractError.FormatError(name: name, value: value)
+    init(locale: NSLocale = NSLocale(localeIdentifier: "POSIX")) {
+        let integerFormatter = NSNumberFormatter()
+        integerFormatter.locale = locale
+        integerFormatter.maximumFractionDigits = 0
+        self.integerFormatter = integerFormatter
     }
-    return n
+
+    private func parseInt(name: String, value: String) throws -> Int? {
+        guard let n = self.integerFormatter.numberFromString(value) as? Int else {
+            throw ExtractError.FormatError(name: name, value: value)
+        }
+        return n
+    }
+
+    func extractFrom(c: [String: String], key: String) -> ExtractedString {
+        return ExtractedString(name: key, value: c[key], parser: self)
+    }
 }
 
 enum ExtractError: ErrorType {
@@ -59,14 +69,11 @@ struct ExtractedTypedValue<T>: ValueKeeper {
 struct ExtractedString: ValueKeeper {
     let name: String
     let value: String?
+    let parser: ValueParser
 
     func asInt() throws -> ExtractedTypedValue<Int> {
-        let ival = try self.value.flatMap({ try parseInt(self.name, value: $0) })
+        let ival = try self.value.flatMap({ try self.parser.parseInt(self.name, value: $0) })
         return ExtractedTypedValue<Int>(name: self.name, value: ival)
     }
-}
-
-func extractFrom(c: [String: String], key: String) -> ExtractedString {
-    return ExtractedString(name: key, value: c[key])
 }
 
