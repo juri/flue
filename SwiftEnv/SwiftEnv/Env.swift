@@ -75,5 +75,10 @@ struct ExtractedString: ValueKeeper {
         let ival = try self.value.flatMap({ try self.parser.parseInt(self.name, value: $0) })
         return ExtractedTypedValue<Int>(name: self.name, value: ival)
     }
+
+    func asBool() throws -> ExtractedTypedValue<Bool> {
+        let bval = self.value.flatMap({ ($0 as NSString).boolValue })
+        return ExtractedTypedValue<Bool>(name: self.name, value: bval)
+    }
 }
 

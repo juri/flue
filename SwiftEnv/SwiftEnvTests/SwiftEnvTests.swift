@@ -86,4 +86,17 @@ class SwiftEnvTests: XCTestCase {
         XCTFail("Expected an exception")
     }
 
+    func testExtract_bool_values() {
+        let env = ["1": "Y", "2": "y", "3": "yeeeees", "4": "true", "5": "TRUE", "6": "n", "7": "m", "8": "f"]
+        let vp = ValueParser()
+        XCTAssertTrue(try! vp.extractFrom(env, key: "1").asBool().required())
+        XCTAssertTrue(try! vp.extractFrom(env, key: "2").asBool().required())
+        XCTAssertTrue(try! vp.extractFrom(env, key: "3").asBool().required())
+        XCTAssertTrue(try! vp.extractFrom(env, key: "4").asBool().required())
+        XCTAssertTrue(try! vp.extractFrom(env, key: "5").asBool().required())
+
+        XCTAssertFalse(try! vp.extractFrom(env, key: "6").asBool().required())
+        XCTAssertFalse(try! vp.extractFrom(env, key: "7").asBool().required())
+        XCTAssertFalse(try! vp.extractFrom(env, key: "8").asBool().required())
+    }
 }
