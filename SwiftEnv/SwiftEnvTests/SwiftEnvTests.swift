@@ -57,7 +57,7 @@ class SwiftEnvTests: XCTestCase {
         } catch ExtractError.FormatError(let name, let value, let vtype) {
             XCTAssertEqual(name, "asdf")
             XCTAssertEqual(value, "notint")
-            XCTAssertEqual(vtype, "Integer")
+            XCTAssertEqual(vtype, "Not an integer")
             return
         } catch let err {
             XCTFail("Unexpected exception \(err)")
@@ -79,7 +79,7 @@ class SwiftEnvTests: XCTestCase {
         } catch ExtractError.FormatError(let name, let value, let vtype) {
             XCTAssertEqual(name, "asdf")
             XCTAssertEqual(value, "notint")
-            XCTAssertEqual(vtype, "Integer")
+            XCTAssertEqual(vtype, "Not an integer")
             return
         } catch let err {
             XCTFail("Unexpected exception \(err)")

@@ -22,7 +22,7 @@ class ValueParser {
 
     private func parseInt(name: String, value: String) throws -> Int? {
         guard let n = self.integerFormatter.numberFromString(value) as? Int else {
-            throw ExtractError.FormatError(name: name, value: value, vtype: "Integer")
+            throw ExtractError.FormatError(name: name, value: value, problem: "Not an integer")
         }
         return n
     }
@@ -34,14 +34,14 @@ class ValueParser {
 
 enum ExtractError: ErrorType {
     case ValueMissing(name: String)
-    case FormatError(name: String, value: String, vtype: String)
+    case FormatError(name: String, value: String, problem: String)
 
     var description: String {
         switch self {
         case .ValueMissing(let name):
             return "Required value \(name) wasn't found"
-        case .FormatError(let name, let value, let vtype):
-            return "\(name) value \(value) can't be interpreted as \(vtype)"
+        case .FormatError(let name, let value, let problem):
+            return "\(name) value \(value) format error: \(problem)"
         }
     }
 }
