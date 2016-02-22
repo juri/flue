@@ -54,9 +54,10 @@ class SwiftEnvTests: XCTestCase {
         let env = ["asdf": "notint"]
         do {
             let _ = try ValueParser(env: env).extract("asdf").asInt().required()
-        } catch ExtractError.FormatError(let name, let value) {
+        } catch ExtractError.FormatError(let name, let value, let vtype) {
             XCTAssertEqual(name, "asdf")
             XCTAssertEqual(value, "notint")
+            XCTAssertEqual(vtype, "Integer")
             return
         } catch let err {
             XCTFail("Unexpected exception \(err)")
@@ -75,9 +76,10 @@ class SwiftEnvTests: XCTestCase {
         let env = ["asdf": "notint"]
         do {
             let _ = try ValueParser(env: env).extract("asdf").asInt().defaultValue(12)
-        } catch ExtractError.FormatError(let name, let value) {
+        } catch ExtractError.FormatError(let name, let value, let vtype) {
             XCTAssertEqual(name, "asdf")
             XCTAssertEqual(value, "notint")
+            XCTAssertEqual(vtype, "Integer")
             return
         } catch let err {
             XCTFail("Unexpected exception \(err)")
