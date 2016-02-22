@@ -40,8 +40,11 @@ class SwiftEnvTests: XCTestCase {
         let env = ["asdf": "1"]
         do {
             let _ = try ValueParser(env: env).extract("qwer").asInt().required()
-        } catch ExtractError.ValueMissing(let name) {
-            XCTAssertEqual(name, "qwer")
+        } catch ExtractError.MultipleErrors(let errs) {
+            XCTAssertEqual(errs.count, 1)
+            if case let ExtractError.ValueMissing(name: name) = errs[0] {
+                XCTAssertEqual(name, "qwer")
+            }
             return
         } catch let err {
             XCTFail("Unexpected exception \(err)")
@@ -54,10 +57,13 @@ class SwiftEnvTests: XCTestCase {
         let env = ["asdf": "notint"]
         do {
             let _ = try ValueParser(env: env).extract("asdf").asInt().required()
-        } catch ExtractError.FormatError(let name, let value, let vtype) {
-            XCTAssertEqual(name, "asdf")
-            XCTAssertEqual(value, "notint")
-            XCTAssertEqual(vtype, "Not an integer")
+        } catch ExtractError.MultipleErrors(let errs) {
+            XCTAssertEqual(errs.count, 1)
+            if case let ExtractError.FormatError(name, value, problem) = errs[0] {
+                XCTAssertEqual(name, "asdf")
+                XCTAssertEqual(value, "notint")
+                XCTAssertEqual(problem, "Not an integer")
+            }
             return
         } catch let err {
             XCTFail("Unexpected exception \(err)")
@@ -76,10 +82,13 @@ class SwiftEnvTests: XCTestCase {
         let env = ["asdf": "notint"]
         do {
             let _ = try ValueParser(env: env).extract("asdf").asInt().defaultValue(12)
-        } catch ExtractError.FormatError(let name, let value, let vtype) {
-            XCTAssertEqual(name, "asdf")
-            XCTAssertEqual(value, "notint")
-            XCTAssertEqual(vtype, "Not an integer")
+        } catch ExtractError.MultipleErrors(let errs) {
+            XCTAssertEqual(errs.count, 1)
+            if case let ExtractError.FormatError(name, value, problem) = errs[0] {
+                XCTAssertEqual(name, "asdf")
+                XCTAssertEqual(value, "notint")
+                XCTAssertEqual(problem, "Not an integer")
+            }
             return
         } catch let err {
             XCTFail("Unexpected exception \(err)")
