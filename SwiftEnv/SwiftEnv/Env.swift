@@ -36,7 +36,7 @@ enum ExtractError: ErrorType {
     case ValueMissing(name: String)
     case FormatError(name: String, value: String, problem: String)
     case OtherError(String)
-    indirect case MultipleErrors([ExtractError])
+    indirect case CollectedErrors([ExtractError])
 
     var description: String {
         switch self {
@@ -46,7 +46,7 @@ enum ExtractError: ErrorType {
             return "\(name) value \(value) format error: \(problem)"
         case .OtherError(let msg):
             return msg
-        case .MultipleErrors(let e):
+        case .CollectedErrors(let e):
             return e.map {$0.description}.joinWithSeparator(", ")
         }
     }
@@ -77,7 +77,7 @@ protocol ValueKeeper {
 extension ValueKeeper {
     func required() throws -> ValueType {
         if self.errors.count > 0 {
-            throw ExtractError.MultipleErrors(self.errors)
+            throw ExtractError.CollectedErrors(self.errors)
         }
         if let v = self.value {
             return v
@@ -91,7 +91,7 @@ extension ValueKeeper {
             case .ValueMissing(_):
                 break
             default:
-                throw ExtractError.MultipleErrors(self.errors)
+                throw ExtractError.CollectedErrors(self.errors)
             }
         }
         if let v = self.value {

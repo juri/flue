@@ -40,7 +40,7 @@ class SwiftEnvTests: XCTestCase {
         let env = ["asdf": "1"]
         do {
             let _ = try ValueParser(env: env).extract("qwer").asInt().required()
-        } catch ExtractError.MultipleErrors(let errs) {
+        } catch ExtractError.CollectedErrors(let errs) {
             XCTAssertEqual(errs.count, 1)
             if case let ExtractError.ValueMissing(name: name) = errs[0] {
                 XCTAssertEqual(name, "qwer")
@@ -57,7 +57,7 @@ class SwiftEnvTests: XCTestCase {
         let env = ["asdf": "notint"]
         do {
             let _ = try ValueParser(env: env).extract("asdf").asInt().required()
-        } catch ExtractError.MultipleErrors(let errs) {
+        } catch ExtractError.CollectedErrors(let errs) {
             XCTAssertEqual(errs.count, 1)
             if case let ExtractError.FormatError(name, value, problem) = errs[0] {
                 XCTAssertEqual(name, "asdf")
@@ -82,7 +82,7 @@ class SwiftEnvTests: XCTestCase {
         let env = ["asdf": "notint"]
         do {
             let _ = try ValueParser(env: env).extract("asdf").asInt().defaultValue(12)
-        } catch ExtractError.MultipleErrors(let errs) {
+        } catch ExtractError.CollectedErrors(let errs) {
             XCTAssertEqual(errs.count, 1)
             if case let ExtractError.FormatError(name, value, problem) = errs[0] {
                 XCTAssertEqual(name, "asdf")
