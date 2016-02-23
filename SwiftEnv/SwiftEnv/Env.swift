@@ -32,9 +32,10 @@ class ValueParser {
     }
 }
 
-enum ExtractError: ErrorType {
+enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     case ValueMissing(name: String)
     case FormatError(name: String, value: String, problem: String)
+    case IntRangeError(name: String, value: Int, range: Range<Int>)
     case OtherError(String)
     indirect case CollectedErrors([ExtractError])
 
@@ -43,7 +44,9 @@ enum ExtractError: ErrorType {
         case .ValueMissing(let name):
             return "Required value \(name) wasn't found"
         case .FormatError(let name, let value, let problem):
-            return "\(name) value \(value) format error: \(problem)"
+            return "Key \"\(name)\" format error. Had value \(value), problem: \(problem)"
+        case let .IntRangeError(name, value, range):
+            return "Key \(name) had value \(value), not in range \(range)"
         case .OtherError(let msg):
             return msg
         case .CollectedErrors(let e):
@@ -59,6 +62,34 @@ enum ExtractError: ErrorType {
             errorDesc = "Unknown error"
         }
         return .OtherError(errorDesc)
+    }
+}
+
+func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
+    switch (ee1, ee2) {
+    case let (.ValueMissing(n1), .ValueMissing(n2)):
+        return n1 == n2
+    case let (.FormatError(name1, value1, problem1), .FormatError(name2, value2, problem2)):
+        return name1 == name2 && value1 == value2 && problem1 == problem2
+    case let (.IntRangeError(name1, value1, range1), .IntRangeError(name2, value2, range2)):
+        return name1 == name2 && value1 == value2 && range1 == range2
+    case let (.OtherError(v1), .OtherError(v2)):
+        return v1 == v2
+    case let (.CollectedErrors(c1), .CollectedErrors(c2)):
+        return c1.count == c2.count && zip(c1, c2).lazy.map { $0.0 == $0.1 }.all()
+    default:
+        return false
+    }
+}
+
+extension SequenceType where Generator.Element == Bool {
+    func all() -> Bool {
+        for elem in self {
+            if !elem {
+                return false
+            }
+        }
+        return true
     }
 }
 
@@ -132,7 +163,7 @@ extension ValueKeeper where ValueType == Int {
             return ExtractedTypedValue(name: self.name, inputValue: self.inputValue, value: val)
         }
 
-        let rangeErr = ExtractError.FormatError(name: self.name, value: self.inputValue ?? "", problem: "Integer not in range \(r)")
+        let rangeErr = ExtractError.IntRangeError(name: self.name, value: val, range: r)
         var errors = self.errors
         errors.append(rangeErr)
         return ExtractedTypedValue(name: self.name, inputValue: self.inputValue, errors: errors)

@@ -110,4 +110,27 @@ class SwiftEnvTests: XCTestCase {
         XCTAssertFalse(try! vp.extract("7").asBool().required())
         XCTAssertFalse(try! vp.extract("8").asBool().required())
     }
+
+    func testExtract_int_range_value_good() {
+        let env = ["asdf": "5"]
+        let v = try! ValueParser(env: env).extract("asdf").asInt().range(1...10).required()
+        XCTAssertEqual(v, 5)
+    }
+
+    func testExtract_int_range_value_outside_range() {
+        let env = ["asdf": "15"]
+        do {
+            try ValueParser(env: env).extract("asdf").asInt().range(1...10).required()
+        } catch ExtractError.CollectedErrors(let ec) {
+            XCTAssertEqual(ec.count, 1)
+            XCTAssertEqual(ec.first, ExtractError.IntRangeError(name: "asdf", value: 15, range: 1...10))
+            return
+        } catch {
+            XCTFail("Unexpected exception \(error)")
+            return
+        }
+        XCTFail("Expected an exception")
+
+    }
+
 }
