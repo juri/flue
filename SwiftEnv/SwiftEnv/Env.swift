@@ -22,7 +22,7 @@ class ValueParser {
 
     private func parseInt(name: String, value: String) throws -> Int {
         guard let n = self.integerFormatter.numberFromString(value) as? Int else {
-            throw ExtractError.FormatError(name: name, value: value, problem: "Not an integer")
+            throw ExtractError.FormatError(name: name, value: value, expectType: "Integer")
         }
         return n
     }
@@ -34,7 +34,7 @@ class ValueParser {
 
 enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     case ValueMissing(name: String)
-    case FormatError(name: String, value: String, problem: String)
+    case FormatError(name: String, value: String, expectType: String)
     case IntRangeError(name: String, value: Int, range: Range<Int>)
     case OtherError(String)
     indirect case CollectedErrors([ExtractError])
@@ -43,8 +43,8 @@ enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
         switch self {
         case .ValueMissing(let name):
             return "Required value \(name) wasn't found"
-        case .FormatError(let name, let value, let problem):
-            return "Key \"\(name)\" format error. Had value \(value), problem: \(problem)"
+        case .FormatError(let name, let value, let expectType):
+            return "Key \"\(name)\" format error. Had value \(value), not \(expectType)"
         case let .IntRangeError(name, value, range):
             return "Key \(name) had value \(value), not in range \(range)"
         case .OtherError(let msg):
@@ -69,8 +69,8 @@ func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
     switch (ee1, ee2) {
     case let (.ValueMissing(n1), .ValueMissing(n2)):
         return n1 == n2
-    case let (.FormatError(name1, value1, problem1), .FormatError(name2, value2, problem2)):
-        return name1 == name2 && value1 == value2 && problem1 == problem2
+    case let (.FormatError(name1, value1, expectType1), .FormatError(name2, value2, expectType2)):
+        return name1 == name2 && value1 == value2 && expectType1 == expectType2
     case let (.IntRangeError(name1, value1, range1), .IntRangeError(name2, value2, range2)):
         return name1 == name2 && value1 == value2 && range1 == range2
     case let (.OtherError(v1), .OtherError(v2)):
@@ -188,6 +188,8 @@ struct ExtractedString: ValueKeeper, CustomDebugStringConvertible {
                 let ival = try self.parser.parseInt(self.name, value: val)
                 debugPrint("asInt: Got ival", ival)
                 return ExtractedTypedValue<Int>(name: self.name, inputValue: self.inputValue, value: ival)
+            } catch let err as ExtractError {
+                return ExtractedTypedValue<Int>(name: self.name, inputValue: self.inputValue, errors: [err])
             } catch {
                 debugPrint("asInt: Failed to parse ival", error)
                 return ExtractedTypedValue<Int>(name: self.name, inputValue: self.inputValue, errors: [ExtractError.fromError(error)])

@@ -59,11 +59,8 @@ class SwiftEnvTests: XCTestCase {
             let _ = try ValueParser(env: env).extract("asdf").asInt().required()
         } catch ExtractError.CollectedErrors(let errs) {
             XCTAssertEqual(errs.count, 1)
-            if case let ExtractError.FormatError(name, value, problem) = errs[0] {
-                XCTAssertEqual(name, "asdf")
-                XCTAssertEqual(value, "notint")
-                XCTAssertEqual(problem, "Not an integer")
-            }
+            print("errs: \(errs)")
+            XCTAssertEqual(errs[0], ExtractError.FormatError(name: "asdf", value: "notint", expectType: "Integer"))
             return
         } catch let err {
             XCTFail("Unexpected exception \(err)")
@@ -84,10 +81,10 @@ class SwiftEnvTests: XCTestCase {
             let _ = try ValueParser(env: env).extract("asdf").asInt().defaultValue(12)
         } catch ExtractError.CollectedErrors(let errs) {
             XCTAssertEqual(errs.count, 1)
-            if case let ExtractError.FormatError(name, value, problem) = errs[0] {
+            if case let ExtractError.FormatError(name, value, expectType) = errs[0] {
                 XCTAssertEqual(name, "asdf")
                 XCTAssertEqual(value, "notint")
-                XCTAssertEqual(problem, "Not an integer")
+                XCTAssertEqual(expectType, "Integer")
             }
             return
         } catch let err {
@@ -130,7 +127,21 @@ class SwiftEnvTests: XCTestCase {
             return
         }
         XCTFail("Expected an exception")
+    }
 
+    func testExtract_int_range_value_not_int() {
+        let env = ["asdf": "qwer"]
+        do {
+            try ValueParser(env: env).extract("asdf").asInt().range(1...10).required()
+        } catch ExtractError.CollectedErrors(let ec) {
+            XCTAssertEqual(ec.count, 1)
+//            XCTAssertEqual(ec.first, ExtractError.FormatError(name: <#T##String#>, value: <#T##String#>, problem: <#T##String#>)
+            return
+        } catch {
+            XCTFail("Unexpected exception \(error)")
+            return
+        }
+        XCTFail("Expected an exception")
     }
 
 }
