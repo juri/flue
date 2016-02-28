@@ -184,14 +184,15 @@ struct ExtractedString: CustomDebugStringConvertible {
         return "ExtractedString name:\(self.name) inputValue:\(self.inputValue)"
     }
 
-    func asInt() -> ValueReader<String, Int> {
+    func inputForReader() -> ConversionContext<String, ExtractError> {
         let original = OriginalValue(name: self.name, value: self.inputValue)
-        func input() -> ConversionContext<String, ExtractError> {
-            guard let val = self.inputValue else {
-                return ConversionContext(originalValue: original, result: .Failure(.ValueMissing(name: self.name)))
-            }
-            return ConversionContext(originalValue: original, result: .Success(val))
+        guard let val = self.inputValue else {
+            return ConversionContext(originalValue: original, result: .Failure(.ValueMissing(name: self.name)))
         }
+        return ConversionContext(originalValue: original, result: .Success(val))
+    }
+
+    func asInt() -> ValueReader<String, Int> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
             do {
                 let parsed = try self.parser.parseInt(ov.name, value: s)
@@ -204,6 +205,15 @@ struct ExtractedString: CustomDebugStringConvertible {
             }
         }
 
-        return ValueReader(input: input, convert: convert)
+        return ValueReader(input: self.inputForReader, convert: convert)
+    }
+
+    func asBool() -> ValueReader<String, Bool> {
+        func convert(s: String, ov: OriginalValue) -> ConversionResult<Bool, ExtractError> {
+            let bval = (s as NSString).boolValue
+            return .Success(bval)
+        }
+
+        return ValueReader(input: self.inputForReader, convert: convert)
     }
 }

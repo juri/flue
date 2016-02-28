@@ -41,4 +41,17 @@ class SwiftEnvTests: XCTestCase {
         }
     }
 
+    func testValueReader_Bool() {
+        let env = ["1": "Y", "2": "y", "3": "yeeeees", "4": "true", "5": "TRUE", "6": "n", "7": "m", "8": "f"]
+        let vp = ValueParser(env: env)
+        XCTAssertTrue(try! vp.extract("1").asBool().required())
+        XCTAssertTrue(try! vp.extract("2").asBool().required())
+        XCTAssertTrue(try! vp.extract("3").asBool().required())
+        XCTAssertTrue(try! vp.extract("4").asBool().required())
+        XCTAssertTrue(try! vp.extract("5").asBool().required())
+
+        XCTAssertFalse(try! vp.extract("6").asBool().required())
+        XCTAssertFalse(try! vp.extract("7").asBool().required())
+        XCTAssertFalse(try! vp.extract("8").asBool().required())
+    }
 }
