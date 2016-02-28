@@ -12,7 +12,7 @@ import XCTest
 class SwiftEnvTests: XCTestCase {
     func testValueReader() {
         let env = ["asdf": "1"]
-        let vp = ValueParser(env: env)
+        let vp = DictParser(dict: env)
         XCTAssertEqual(try! vp.extract("asdf").asInt().required(), 1)
         XCTAssertEqual(try! vp.extract("asdf").asInt().range(0...5).required(), 1)
         XCTAssertEqual(vp.extract("asdf").asInt().range(2...5).defaultValue(2), 2)
@@ -43,7 +43,7 @@ class SwiftEnvTests: XCTestCase {
 
     func testValueReader_Bool() {
         let env = ["1": "Y", "2": "y", "3": "yeeeees", "4": "true", "5": "TRUE", "6": "n", "7": "m", "8": "f"]
-        let vp = ValueParser(env: env)
+        let vp = DictParser(dict: env)
         XCTAssertTrue(try! vp.extract("1").asBool().required())
         XCTAssertTrue(try! vp.extract("2").asBool().required())
         XCTAssertTrue(try! vp.extract("3").asBool().required())
@@ -56,7 +56,7 @@ class SwiftEnvTests: XCTestCase {
     }
 
     func testHelp() {
-        let vp = ValueParser(env: ["q": "12"])
+        let vp = DictParser(dict: ["q": "12"])
         XCTAssertEqual(vp.extract("a").asInt().help(), ["Name: a", "Integer"])
         XCTAssertEqual(vp.extract("a").asInt().range(1...10).help(), ["Name: a", "Integer", "Range: 1..<11"])
         XCTAssertEqual(vp.extract("a").asBool().help(), ["Name: a", "True if string starts with [YyTt1-9]"])

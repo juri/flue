@@ -10,14 +10,12 @@ import Foundation
 
 class ValueParser {
     private let integerFormatter: NSNumberFormatter
-    private let env: [String: String]
 
-    init(env: [String: String], locale: NSLocale = NSLocale(localeIdentifier: "POSIX")) {
+    init(locale: NSLocale = NSLocale(localeIdentifier: "POSIX")) {
         let integerFormatter = NSNumberFormatter()
         integerFormatter.locale = locale
         integerFormatter.maximumFractionDigits = 0
         self.integerFormatter = integerFormatter
-        self.env = env
     }
 
     private func parseInt(name: String, value: String) throws -> Int {
@@ -27,8 +25,22 @@ class ValueParser {
         return n
     }
 
+    func extract(name: String, value: String?) -> ExtractedString {
+        return ExtractedString(name: name, inputValue: value, parser: self)
+    }
+}
+
+class DictParser {
+    private let vp: ValueParser
+    private let dict: [String: String]
+
+    init(dict: [String: String], valueParser: ValueParser = ValueParser()) {
+        self.dict = dict
+        self.vp = valueParser
+    }
+
     func extract(key: String) -> ExtractedString {
-        return ExtractedString(name: key, inputValue: self.env[key], parser: self)
+        return self.vp.extract(key, value: self.dict[key])
     }
 }
 
