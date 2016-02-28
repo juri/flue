@@ -170,85 +170,7 @@ extension VRP where Output == Int {
     }
 }
 
-protocol ValueKeeper {
-    typealias ValueType
-
-    var name: String { get }
-    var inputValue: String? { get }
-    var value: ValueType? { get }
-    var errors: [ExtractError] { get }
-
-    func required() throws -> ValueType
-    func defaultValue(dv: ValueType) throws -> ValueType
-}
-
-extension ValueKeeper {
-    func required() throws -> ValueType {
-        if self.errors.count > 0 {
-            throw ExtractError.CollectedErrors(self.errors)
-        }
-        if let v = self.value {
-            return v
-        }
-        throw ExtractError.ValueMissing(name: self.name)
-    }
-
-    func defaultValue(dv: ValueType) throws -> ValueType {
-        if self.errors.count > 0 {
-            switch self.errors[0] {
-            case .ValueMissing(_):
-                break
-            default:
-                throw ExtractError.CollectedErrors(self.errors)
-            }
-        }
-        if let v = self.value {
-            return v
-        }
-        return dv
-    }
-}
-
-struct ExtractedTypedValue<T>: ValueKeeper {
-    let name: String
-    let inputValue: String?
-    let value: T?
-    let errors: [ExtractError]
-
-    init(name: String, inputValue: String?, value: T) {
-        self.name = name
-        self.inputValue = inputValue
-        self.value = value
-        self.errors = []
-    }
-
-    init(name: String, inputValue: String?, errors: [ExtractError]) {
-        self.name = name
-        self.inputValue = inputValue
-        self.value = nil
-        self.errors = errors
-    }
-}
-
-extension ValueKeeper where ValueType == Int {
-    func range(r: Range<Int>) -> ExtractedTypedValue<Int> {
-        guard let val = self.value else {
-            return ExtractedTypedValue(name: self.name, inputValue: self.inputValue, errors: self.errors)
-        }
-
-        if r.contains(val) {
-            return ExtractedTypedValue(name: self.name, inputValue: self.inputValue, value: val)
-        }
-
-        let rangeErr = ExtractError.IntRangeError(name: self.name, value: val, range: r)
-        var errors = self.errors
-        errors.append(rangeErr)
-        return ExtractedTypedValue(name: self.name, inputValue: self.inputValue, errors: errors)
-    }
-}
-
-
-struct ExtractedString: ValueKeeper, CustomDebugStringConvertible {
+struct ExtractedString: CustomDebugStringConvertible {
     let name: String
     let inputValue: String?
     let parser: ValueParser
@@ -258,36 +180,11 @@ struct ExtractedString: ValueKeeper, CustomDebugStringConvertible {
         return self.inputValue
     }
 
-    func asInt() throws -> ExtractedTypedValue<Int> {
-        debugPrint("asInt: Enter", self)
-        if let val = self.value {
-            do {
-                let ival = try self.parser.parseInt(self.name, value: val)
-                debugPrint("asInt: Got ival", ival)
-                return ExtractedTypedValue<Int>(name: self.name, inputValue: self.inputValue, value: ival)
-            } catch let err as ExtractError {
-                return ExtractedTypedValue<Int>(name: self.name, inputValue: self.inputValue, errors: [err])
-            } catch {
-                debugPrint("asInt: Failed to parse ival", error)
-                return ExtractedTypedValue<Int>(name: self.name, inputValue: self.inputValue, errors: [ExtractError.fromError(error)])
-            }
-        }
-        return ExtractedTypedValue<Int>(name: self.name, inputValue: self.inputValue, errors: [.ValueMissing(name: self.name)])
-    }
-
-    func asBool() throws -> ExtractedTypedValue<Bool> {
-        if let val = self.value {
-            let bval = (val as NSString).boolValue
-            return ExtractedTypedValue<Bool>(name: self.name, inputValue: self.inputValue, value: bval)
-        }
-        return ExtractedTypedValue<Bool>(name: self.name, inputValue: self.inputValue, errors: [.ValueMissing(name: self.name)])
-    }
-
     var debugDescription: String {
         return "ExtractedString name:\(self.name) inputValue:\(self.inputValue)"
     }
 
-    func asInt2() -> ValueReader<String, Int> {
+    func asInt() -> ValueReader<String, Int> {
         let original = OriginalValue(name: self.name, value: self.inputValue)
         func input() -> ConversionContext<String, ExtractError> {
             guard let val = self.inputValue else {
