@@ -61,10 +61,16 @@ class SwiftEnvTests: XCTestCase {
         XCTAssertEqual(vp.extract("a").asInt().range(1...10).help(), ["Name: a", "Integer", "Range: 1..<11"])
         XCTAssertEqual(vp.extract("a").asBool().help(), ["Name: a", "True if string starts with [YyTt1-9]"])
         XCTAssertEqual(vp.extract("a").asBool().usage("Usage string"), ["Name: a", "True if string starts with [YyTt1-9]", "Usage string"])
+        XCTAssertEqual(vp.extract("a").asString().help(), ["Name: a", "String"])
 
         let c = vp.extract("q").asInt()
         let cv = try! c.required()
         XCTAssertEqual(c.help(), ["Name: q", "Integer"])
         XCTAssertEqual(cv, 12)
+    }
+
+    func testString() {
+        let vp = DictParser(dict: ["q": "w"])
+        XCTAssertEqual(try! vp.extract("q").asString().required(), "w")
     }
 }

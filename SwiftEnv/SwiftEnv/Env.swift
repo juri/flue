@@ -202,6 +202,16 @@ struct ExtractedString: CustomDebugStringConvertible {
         return ConversionContext(originalValue: original, result: .Success(val))
     }
 
+    func asString() -> ConversionStep<String, String> {
+        func convert(s: String, ov: OriginalValue) -> ConversionResult<String, ExtractError> {
+            return .Success(s)
+        }
+        func help() -> [String] {
+            return [self.help, "String"]
+        }
+        return ConversionStep(input: self.inputForReader, convert: convert, help: help)
+    }
+
     func asInt() -> ConversionStep<String, Int> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
             do {
