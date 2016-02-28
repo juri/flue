@@ -95,6 +95,7 @@ struct ConversionContext<T, Error: ErrorType> {
 struct ConversionStep<Input, Output>: ConversionStepProtocol {
     let input: () -> ConversionContext<Input, ExtractError>
     let convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError>
+    let help: () -> [String]
 
     func readValue() -> ConversionContext<Output, ExtractError> {
         let cc = self.input()
@@ -127,6 +128,13 @@ struct ConversionStep<Input, Output>: ConversionStepProtocol {
         case .Failure(_): return nil
         }
     }
+
+    func usage(s: String, prefix: Bool = false) -> [String] {
+        if prefix {
+            return [s] + self.help()
+        }
+        return self.help() + [s]
+    }
 }
 
 protocol ConversionStepProtocol {
@@ -135,6 +143,7 @@ protocol ConversionStepProtocol {
 
     var input: () -> ConversionContext<Input, ExtractError> { get }
     var convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError> { get }
+    var help: () -> [String] { get }
     func readValue() -> ConversionContext<Output, ExtractError>
 }
 
@@ -149,7 +158,10 @@ extension ConversionStepProtocol where Output == Int {
             }
             return .Failure(ExtractError.IntRangeError(name: ov.name, value: i, range: r))
         }
-        return ConversionStep(input: input, convert: convert)
+        func help() -> [String] {
+            return self.help() + ["Range: \(r)"]
+        }
+        return ConversionStep(input: input, convert: convert, help: help)
     }
 }
 
@@ -164,6 +176,10 @@ struct ExtractedString: CustomDebugStringConvertible {
 
     var debugDescription: String {
         return "ExtractedString name:\(self.name) inputValue:\(self.inputValue)"
+    }
+
+    var help: String {
+        return "Name: \(self.name)"
     }
 
     func inputForReader() -> ConversionContext<String, ExtractError> {
@@ -185,8 +201,11 @@ struct ExtractedString: CustomDebugStringConvertible {
                 return .Failure(ExtractError.fromError(error))
             }
         }
+        func help() -> [String] {
+            return [self.help] + ["Integer"]
+        }
 
-        return ConversionStep(input: self.inputForReader, convert: convert)
+        return ConversionStep(input: self.inputForReader, convert: convert, help: help)
     }
 
     func asBool() -> ConversionStep<String, Bool> {
@@ -195,6 +214,10 @@ struct ExtractedString: CustomDebugStringConvertible {
             return .Success(bval)
         }
 
-        return ConversionStep(input: self.inputForReader, convert: convert)
+        func help() -> [String] {
+            return [self.help] + ["True if string starts with [YyTt1-9]"]
+        }
+
+        return ConversionStep(input: self.inputForReader, convert: convert, help: help)
     }
 }

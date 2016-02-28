@@ -54,4 +54,17 @@ class SwiftEnvTests: XCTestCase {
         XCTAssertFalse(try! vp.extract("7").asBool().required())
         XCTAssertFalse(try! vp.extract("8").asBool().required())
     }
+
+    func testHelp() {
+        let vp = ValueParser(env: ["q": "12"])
+        XCTAssertEqual(vp.extract("a").asInt().help(), ["Name: a", "Integer"])
+        XCTAssertEqual(vp.extract("a").asInt().range(1...10).help(), ["Name: a", "Integer", "Range: 1..<11"])
+        XCTAssertEqual(vp.extract("a").asBool().help(), ["Name: a", "True if string starts with [YyTt1-9]"])
+        XCTAssertEqual(vp.extract("a").asBool().usage("Usage string"), ["Name: a", "True if string starts with [YyTt1-9]", "Usage string"])
+
+        let c = vp.extract("q").asInt()
+        let cv = try! c.required()
+        XCTAssertEqual(c.help(), ["Name: q", "Integer"])
+        XCTAssertEqual(cv, 12)
+    }
 }
