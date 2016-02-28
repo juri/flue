@@ -37,7 +37,6 @@ enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     case FormatError(name: String, value: String, expectType: String)
     case IntRangeError(name: String, value: Int, range: Range<Int>)
     case OtherError(String)
-    indirect case CollectedErrors([ExtractError])
 
     var description: String {
         switch self {
@@ -49,8 +48,6 @@ enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
             return "Key \(name) had value \(value), not in range \(range)"
         case .OtherError(let msg):
             return msg
-        case .CollectedErrors(let e):
-            return e.map {$0.description}.joinWithSeparator(", ")
         }
     }
 
@@ -75,21 +72,8 @@ func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
         return name1 == name2 && value1 == value2 && range1 == range2
     case let (.OtherError(v1), .OtherError(v2)):
         return v1 == v2
-    case let (.CollectedErrors(c1), .CollectedErrors(c2)):
-        return c1.count == c2.count && zip(c1, c2).lazy.map { $0.0 == $0.1 }.all()
     default:
         return false
-    }
-}
-
-extension SequenceType where Generator.Element == Bool {
-    func all() -> Bool {
-        for elem in self {
-            if !elem {
-                return false
-            }
-        }
-        return true
     }
 }
 
@@ -173,7 +157,6 @@ struct ExtractedString: CustomDebugStringConvertible {
     let name: String
     let inputValue: String?
     let parser: ValueParser
-    let errors: [ExtractError] = []
 
     var value: String? {
         return self.inputValue
