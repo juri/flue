@@ -144,4 +144,35 @@ class SwiftEnvTests: XCTestCase {
         XCTFail("Expected an exception")
     }
 
+    func testValueReader() {
+        let env = ["asdf": "1"]
+        let vp = ValueParser(env: env)
+        XCTAssertEqual(try! vp.extract("asdf").asInt2().required(), 1)
+        XCTAssertEqual(try! vp.extract("asdf").asInt2().range(0...5).required(), 1)
+        XCTAssertEqual(vp.extract("asdf").asInt2().range(2...5).defaultValue(2), 2)
+        XCTAssertEqual(vp.extract("zap").asInt2().range(2...5).defaultValue(2), 2)
+        XCTAssertEqual(vp.extract("zap").asInt2().defaultValue(2), 2)
+        XCTAssertNil(vp.extract("asdf").asInt2().range(2...5).optional())
+        do {
+            try vp.extract("zap").asInt2().required()
+            XCTFail("Expected an exception")
+        } catch let ExtractError.ValueMissing(name) {
+            XCTAssertEqual(name, "zap")
+        } catch {
+            XCTFail("Unexpected exception \(error)")
+            return
+        }
+        do {
+            try vp.extract("asdf").asInt2().range(10...20).required()
+            XCTFail("Expected an exception")
+        } catch let ExtractError.IntRangeError(name, value, range) {
+            XCTAssertEqual(name, "asdf")
+            XCTAssertEqual(value, 1)
+            XCTAssertEqual(range, 10...20)
+        } catch {
+            XCTFail("Unexpected exception \(error)")
+            return
+        }
+    }
+
 }

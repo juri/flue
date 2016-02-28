@@ -93,6 +93,83 @@ extension SequenceType where Generator.Element == Bool {
     }
 }
 
+enum ConversionResult<T, Error: ErrorType> {
+    case Success(T)
+    case Failure(Error)
+}
+
+struct OriginalValue {
+    let name: String
+    let value: String?
+}
+
+struct ConversionContext<T, Error: ErrorType> {
+    let originalValue: OriginalValue
+    let result: ConversionResult<T, Error>
+}
+
+struct ValueReader<Input, Output>: VRP {
+    let input: () -> ConversionContext<Input, ExtractError>
+    let convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError>
+
+    func readValue() -> ConversionContext<Output, ExtractError> {
+        let cc = self.input()
+        switch cc.result {
+        case .Success(let v): return ConversionContext(originalValue: cc.originalValue, result: self.convert(v, cc.originalValue))
+        case .Failure(let e): return ConversionContext(originalValue: cc.originalValue, result: .Failure(e))
+        }
+    }
+
+    func required() throws -> Output {
+        let cc = self.readValue()
+        switch cc.result {
+        case .Success(let v): return v
+        case .Failure(let e): throw e
+        }
+    }
+
+    func defaultValue(v: Output) -> Output {
+        let cc = self.readValue()
+        switch cc.result {
+        case .Success(let v): return v
+        case .Failure(_): return v
+        }
+    }
+
+    func optional() -> Output? {
+        let cc = self.readValue()
+        switch cc.result {
+        case .Success(let v): return v
+        case .Failure(_): return nil
+        }
+    }
+}
+
+
+protocol VRP {
+    typealias Input
+    typealias Output
+
+    var input: () -> ConversionContext<Input, ExtractError> { get }
+    var convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError> { get }
+    func readValue() -> ConversionContext<Output, ExtractError>
+}
+
+extension VRP where Output == Int {
+    func range(r: Range<Int>) -> ValueReader<Int, Int> {
+        func input() -> ConversionContext<Int, ExtractError> {
+            return self.readValue()
+        }
+        func convert(i: Int, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
+            if r.contains(i) {
+                return .Success(i)
+            }
+            return .Failure(ExtractError.IntRangeError(name: ov.name, value: i, range: r))
+        }
+        return ValueReader(input: input, convert: convert)
+    }
+}
+
 protocol ValueKeeper {
     typealias ValueType
 
@@ -210,5 +287,26 @@ struct ExtractedString: ValueKeeper, CustomDebugStringConvertible {
         return "ExtractedString name:\(self.name) inputValue:\(self.inputValue)"
     }
 
-}
+    func asInt2() -> ValueReader<String, Int> {
+        let original = OriginalValue(name: self.name, value: self.inputValue)
+        func input() -> ConversionContext<String, ExtractError> {
+            guard let val = self.inputValue else {
+                return ConversionContext(originalValue: original, result: .Failure(.ValueMissing(name: self.name)))
+            }
+            return ConversionContext(originalValue: original, result: .Success(val))
+        }
+        func convert(s: String, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
+            do {
+                let parsed = try self.parser.parseInt(ov.name, value: s)
+                return .Success(parsed)
+            } catch let err as ExtractError {
+                return .Failure(err)
+            } catch {
+                debugPrint("asInt: Failed to parse ival", error)
+                return .Failure(ExtractError.fromError(error))
+            }
+        }
 
+        return ValueReader(input: input, convert: convert)
+    }
+}
