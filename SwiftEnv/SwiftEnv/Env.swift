@@ -224,7 +224,7 @@ struct ExtractedString: CustomDebugStringConvertible {
             }
         }
         func help() -> [String] {
-            return [self.help] + ["Integer"]
+            return [self.help, "Integer"]
         }
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
@@ -237,7 +237,7 @@ struct ExtractedString: CustomDebugStringConvertible {
         }
 
         func help() -> [String] {
-            return [self.help] + ["True if string starts with [YyTt1-9]"]
+            return [self.help, "True if string starts with [YyTt1-9]"]
         }
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
