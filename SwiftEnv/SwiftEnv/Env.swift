@@ -182,7 +182,6 @@ struct ExtractedString: CustomDebugStringConvertible {
             } catch let err as ExtractError {
                 return .Failure(err)
             } catch {
-                debugPrint("asInt: Failed to parse ival", error)
                 return .Failure(ExtractError.fromError(error))
             }
         }
