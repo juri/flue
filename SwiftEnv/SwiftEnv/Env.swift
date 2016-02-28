@@ -108,7 +108,7 @@ struct ConversionContext<T, Error: ErrorType> {
     let result: ConversionResult<T, Error>
 }
 
-struct ValueReader<Input, Output>: VRP {
+struct ConversionStep<Input, Output>: ConversionStepProtocol {
     let input: () -> ConversionContext<Input, ExtractError>
     let convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError>
 
@@ -145,8 +145,7 @@ struct ValueReader<Input, Output>: VRP {
     }
 }
 
-
-protocol VRP {
+protocol ConversionStepProtocol {
     typealias Input
     typealias Output
 
@@ -155,8 +154,8 @@ protocol VRP {
     func readValue() -> ConversionContext<Output, ExtractError>
 }
 
-extension VRP where Output == Int {
-    func range(r: Range<Int>) -> ValueReader<Int, Int> {
+extension ConversionStepProtocol where Output == Int {
+    func range(r: Range<Int>) -> ConversionStep<Int, Int> {
         func input() -> ConversionContext<Int, ExtractError> {
             return self.readValue()
         }
@@ -166,7 +165,7 @@ extension VRP where Output == Int {
             }
             return .Failure(ExtractError.IntRangeError(name: ov.name, value: i, range: r))
         }
-        return ValueReader(input: input, convert: convert)
+        return ConversionStep(input: input, convert: convert)
     }
 }
 
@@ -192,7 +191,7 @@ struct ExtractedString: CustomDebugStringConvertible {
         return ConversionContext(originalValue: original, result: .Success(val))
     }
 
-    func asInt() -> ValueReader<String, Int> {
+    func asInt() -> ConversionStep<String, Int> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
             do {
                 let parsed = try self.parser.parseInt(ov.name, value: s)
@@ -205,15 +204,15 @@ struct ExtractedString: CustomDebugStringConvertible {
             }
         }
 
-        return ValueReader(input: self.inputForReader, convert: convert)
+        return ConversionStep(input: self.inputForReader, convert: convert)
     }
 
-    func asBool() -> ValueReader<String, Bool> {
+    func asBool() -> ConversionStep<String, Bool> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<Bool, ExtractError> {
             let bval = (s as NSString).boolValue
             return .Success(bval)
         }
 
-        return ValueReader(input: self.inputForReader, convert: convert)
+        return ConversionStep(input: self.inputForReader, convert: convert)
     }
 }
