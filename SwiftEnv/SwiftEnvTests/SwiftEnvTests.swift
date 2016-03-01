@@ -73,4 +73,51 @@ class SwiftEnvTests: XCTestCase {
         let vp = DictParser(dict: ["q": "w"])
         XCTAssertEqual(try! vp.extract("q").asString().required(), "w")
     }
+
+    func testJSONWithFullConvert() {
+        let vp = DictParser(dict: ["q": "{\"w\": 1}"])
+        func convert(v: AnyObject, ov: OriginalValue) -> ConversionResult<[String: Int], ExtractError> {
+            if let vd = v as? [String: Int] {
+                return .Success(vd)
+            }
+            return .Failure(ExtractError.OtherError("Can't convert value \(v) to dict"))
+        }
+        let j = try! vp.extract("q").asJSON().asType(convert, help: "plerp").required()
+        XCTAssertEqual(j, ["w": 1])
+    }
+
+    func testJSONWithOptionalConvert() {
+        let vp = DictParser(dict: ["q": "{\"w\": 1}"])
+        func convert(v: AnyObject, ov: OriginalValue) -> [String: Int]? {
+            return v as? [String: Int]
+        }
+        let j = try! vp.extract("q").asJSON().asType(convert, help: "plerp").required()
+        XCTAssertEqual(j, ["w": 1])
+    }
+
+    func testJSONWithOptionalConvertFailure() {
+        let vp = DictParser(dict: ["q": "{\"w\": \"e\"}"])
+        func convert(v: AnyObject, ov: OriginalValue) -> [String: Int]? {
+            return v as? [String: Int]
+        }
+        do {
+            try vp.extract("q").asJSON().asType(convert).required()
+            XCTFail("Expected an exception")
+        } catch let ExtractError.FormatError(name, value, expectType) {
+            XCTAssertEqual(name, "q")
+            XCTAssertEqual(value, "{\"w\": \"e\"}")
+            XCTAssertEqual(expectType, "Dictionary<String, Int>")
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
+    func testJSONWithOptionalConvertHelp() {
+        let vp = DictParser(dict: ["q": "{\"w\": \"e\"}"])
+        func convert(v: AnyObject, ov: OriginalValue) -> [String: Int]? {
+            return v as? [String: Int]
+        }
+        let help = vp.extract("q").asJSON().asType(convert).help()
+        XCTAssertEqual(help, ["Name: q", "JSON Data", "Type: Dictionary<String, Int>"])
+    }
 }

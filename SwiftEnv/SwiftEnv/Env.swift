@@ -159,6 +159,32 @@ protocol ConversionStepProtocol {
     func readValue() -> ConversionContext<Output, ExtractError>
 }
 
+extension ConversionStepProtocol {
+    func asType<NewType>(convert: ((Output, OriginalValue) -> ConversionResult<NewType, ExtractError>), help: String? = nil) -> ConversionStep<Output,NewType> {
+        func input() -> ConversionContext<Output, ExtractError> {
+            return self.readValue()
+        }
+        func helpFunc() -> [String] {
+            if let h = help {
+                return self.help() + [h]
+            } else {
+                return self.help() + ["Type: \(NewType.self)"]
+            }
+        }
+        return ConversionStep(input: input, convert: convert, help: helpFunc)
+    }
+
+    func asType<NewType>(convert: ((Output, OriginalValue) -> NewType?), help: String? = nil) -> ConversionStep<Output,NewType> {
+        func cwrap(v: Output, ov: OriginalValue) -> ConversionResult<NewType, ExtractError> {
+            if let cv = convert(v, ov) {
+                return .Success(cv)
+            }
+            return .Failure(ExtractError.FormatError(name: ov.name, value: ov.value ?? "", expectType: "\(NewType.self)"))
+        }
+        return self.asType(cwrap, help: help)
+    }
+}
+
 extension ConversionStepProtocol where Output == Int {
     func range(r: Range<Int>) -> ConversionStep<Int, Int> {
         func input() -> ConversionContext<Int, ExtractError> {
@@ -241,5 +267,18 @@ struct ExtractedString: CustomDebugStringConvertible {
         }
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
+    }
+
+    func asJSON(allowFragments: Bool = false) -> ConversionStep<String, AnyObject> {
+        func convert(s: String, ov: OriginalValue) -> ConversionResult<AnyObject, ExtractError> {
+            do {
+                let opts: NSJSONReadingOptions = allowFragments ? [.AllowFragments] : []
+                let ob = try NSJSONSerialization.JSONObjectWithData(s.dataUsingEncoding(NSUTF8StringEncoding)!, options: opts)
+                return .Success(ob)
+            } catch {
+                return .Failure(ExtractError.fromError(error))
+            }
+        }
+        return ConversionStep(input: self.inputForReader, convert: convert, help: { [self.help, "JSON Data"]})
     }
 }
