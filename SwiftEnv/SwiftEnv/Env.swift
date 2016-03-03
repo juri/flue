@@ -48,6 +48,8 @@ enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     case ValueMissing(name: String)
     case FormatError(name: String, value: String, expectType: String)
     case IntRangeError(name: String, value: Int, range: Range<Int>)
+    case StringMinLengthError(name: String, value: String, minLength: Int)
+    case StringMaxLengthError(name: String, value: String, maxLength: Int)
     case OtherError(String)
 
     var description: String {
@@ -58,6 +60,10 @@ enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
             return "Key \"\(name)\" format error. Had value \(value), not \(expectType)"
         case let .IntRangeError(name, value, range):
             return "Key \(name) had value \(value), not in range \(range)"
+        case let .StringMinLengthError(name, value, minLength):
+            return "Key \(name) had value \(value), shorter than minimum length \(minLength)"
+        case let .StringMaxLengthError(name, value, maxLength):
+            return "Key \(name) had value \(value), longer than minimum length \(maxLength)"
         case .OtherError(let msg):
             return msg
         }
@@ -82,6 +88,10 @@ func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
         return name1 == name2 && value1 == value2 && expectType1 == expectType2
     case let (.IntRangeError(name1, value1, range1), .IntRangeError(name2, value2, range2)):
         return name1 == name2 && value1 == value2 && range1 == range2
+    case let (.StringMinLengthError(name1, value1, l1), .StringMinLengthError(name2, value2, l2)):
+        return name1 == name2 && value1 == value2 && l1 == l2
+    case let (.StringMaxLengthError(name1, value1, l1), .StringMaxLengthError(name2, value2, l2)):
+        return name1 == name2 && value1 == value2 && l1 == l2
     case let (.OtherError(v1), .OtherError(v2)):
         return v1 == v2
     default:
@@ -200,6 +210,34 @@ extension ConversionStepProtocol where Output == Int {
             return self.help() + ["Range: \(r)"]
         }
         return ConversionStep(input: input, convert: convert, help: help)
+    }
+}
+
+extension ConversionStepProtocol where Output == String {
+    func minLength(l: Int) -> ConversionStep<String, String> {
+        func convert(s: String, ov: OriginalValue) -> ConversionResult<String, ExtractError> {
+            if s.characters.count >= l {
+                return .Success(s)
+            }
+            return .Failure(ExtractError.StringMinLengthError(name: ov.name, value: s, minLength: l))
+        }
+        func help() -> [String] {
+            return self.help() + ["Minimum length: \(l)"]
+        }
+        return ConversionStep(input: self.readValue, convert: convert, help: help)
+    }
+
+    func maxLength(l: Int) -> ConversionStep<String, String> {
+        func convert(s: String, ov: OriginalValue) -> ConversionResult<String, ExtractError> {
+            if s.characters.count <= l {
+                return .Success(s)
+            }
+            return .Failure(ExtractError.StringMaxLengthError(name: ov.name, value: s, maxLength: l))
+        }
+        func help() -> [String] {
+            return self.help() + ["Maximum length: \(l)"]
+        }
+        return ConversionStep(input: self.readValue, convert: convert, help: help)
     }
 }
 

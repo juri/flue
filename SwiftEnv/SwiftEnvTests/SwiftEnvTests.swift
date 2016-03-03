@@ -120,4 +120,36 @@ class SwiftEnvTests: XCTestCase {
         let help = vp.extract("q").asJSON().asType(convert).help()
         XCTAssertEqual(help, ["Name: q", "JSON Data", "Type: Dictionary<String, Int>"])
     }
+
+    func testStringLength() {
+        let vp = DictParser(dict: ["q": "wer"])
+
+        switch vp.extract("q").asString().minLength(1).readValue().result {
+        case .Success(let v):
+            XCTAssertEqual(v, "wer")
+        case .Failure(let e):
+            XCTFail("Unexpected error \(e)")
+        }
+
+        switch vp.extract("q").asString().minLength(4).readValue().result {
+        case .Success(let v):
+            XCTFail("Unexpected success \(v)")
+        case .Failure(let e):
+            XCTAssertEqual(e, ExtractError.StringMinLengthError(name: "q", value: "wer", minLength: 4))
+        }
+
+        switch vp.extract("q").asString().maxLength(4).readValue().result {
+        case .Success(let v):
+            XCTAssertEqual(v, "wer")
+        case .Failure(let e):
+            XCTFail("Unexpected error \(e)")
+        }
+
+        switch vp.extract("q").asString().maxLength(2).readValue().result {
+        case .Success(let v):
+            XCTFail("Unexpected success \(v)")
+        case .Failure(let e):
+            XCTAssertEqual(e, ExtractError.StringMaxLengthError(name: "q", value: "wer", maxLength: 2))
+        }
+    }
 }
