@@ -11,6 +11,7 @@
 		CB4467ED1C6A50CF00D49630 /* SwiftEnv.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB4467E21C6A50CF00D49630 /* SwiftEnv.framework */; };
 		CB4467F21C6A50CF00D49630 /* SwiftEnvTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467F11C6A50CF00D49630 /* SwiftEnvTests.swift */; };
 		CB4467FD1C6A510200D49630 /* Env.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467FC1C6A510200D49630 /* Env.swift */; };
+		CBEB4B881C89ECE40002DC71 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEB4B871C89ECE40002DC71 /* JSON.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +32,7 @@
 		CB4467F11C6A50CF00D49630 /* SwiftEnvTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftEnvTests.swift; sourceTree = "<group>"; };
 		CB4467F31C6A50CF00D49630 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CB4467FC1C6A510200D49630 /* Env.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Env.swift; sourceTree = "<group>"; };
+		CBEB4B871C89ECE40002DC71 /* JSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +78,7 @@
 				CB4467E51C6A50CF00D49630 /* SwiftEnv.h */,
 				CB4467E71C6A50CF00D49630 /* Info.plist */,
 				CB4467FC1C6A510200D49630 /* Env.swift */,
+				CBEB4B871C89ECE40002DC71 /* JSON.swift */,
 			);
 			path = SwiftEnv;
 			sourceTree = "<group>";
@@ -198,6 +201,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB4467FD1C6A510200D49630 /* Env.swift in Sources */,
+				CBEB4B881C89ECE40002DC71 /* JSON.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -386,6 +390,7 @@
 				CB4467F81C6A50CF00D49630 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		CB4467F91C6A50CF00D49630 /* Build configuration list for PBXNativeTarget "SwiftEnvTests" */ = {
 			isa = XCConfigurationList;
@@ -394,6 +399,7 @@
 				CB4467FB1C6A50CF00D49630 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

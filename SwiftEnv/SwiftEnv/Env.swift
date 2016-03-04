@@ -306,17 +306,4 @@ struct ExtractedString: CustomDebugStringConvertible {
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
     }
-
-    func asJSON(allowFragments: Bool = false) -> ConversionStep<String, AnyObject> {
-        func convert(s: String, ov: OriginalValue) -> ConversionResult<AnyObject, ExtractError> {
-            do {
-                let opts: NSJSONReadingOptions = allowFragments ? [.AllowFragments] : []
-                let ob = try NSJSONSerialization.JSONObjectWithData(s.dataUsingEncoding(NSUTF8StringEncoding)!, options: opts)
-                return .Success(ob)
-            } catch {
-                return .Failure(ExtractError.fromError(error))
-            }
-        }
-        return ConversionStep(input: self.inputForReader, convert: convert, help: { [self.help, "JSON Data"]})
-    }
 }
