@@ -50,6 +50,7 @@ enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     case IntRangeError(name: String, value: Int, range: Range<Int>)
     case StringMinLengthError(name: String, value: String, minLength: Int)
     case StringMaxLengthError(name: String, value: String, maxLength: Int)
+    case RegexpError(name: String, value: String, regexp: String)
     case OtherError(String)
 
     var description: String {
@@ -64,6 +65,8 @@ enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
             return "Key \(name) had value \(value), shorter than minimum length \(minLength)"
         case let .StringMaxLengthError(name, value, maxLength):
             return "Key \(name) had value \(value), longer than minimum length \(maxLength)"
+        case let .RegexpError(name, value, regexp):
+            return "Key \(name) had value \(value) that didn't match regular expression \(regexp)"
         case .OtherError(let msg):
             return msg
         }
@@ -94,6 +97,8 @@ func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
         return name1 == name2 && value1 == value2 && l1 == l2
     case let (.OtherError(v1), .OtherError(v2)):
         return v1 == v2
+    case let (.RegexpError(n1, v1, r1), .RegexpError(n2, v2, r2)):
+        return n1 == n2 && v1 == v2 && r1 == r2
     default:
         return false
     }

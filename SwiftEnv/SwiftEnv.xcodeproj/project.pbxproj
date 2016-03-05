@@ -12,6 +12,7 @@
 		CB4467F21C6A50CF00D49630 /* SwiftEnvTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467F11C6A50CF00D49630 /* SwiftEnvTests.swift */; };
 		CB4467FD1C6A510200D49630 /* Env.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467FC1C6A510200D49630 /* Env.swift */; };
 		CBEB4B881C89ECE40002DC71 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEB4B871C89ECE40002DC71 /* JSON.swift */; };
+		CBEB4B8A1C89ED440002DC71 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEB4B891C89ED440002DC71 /* Regex.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,6 +34,7 @@
 		CB4467F31C6A50CF00D49630 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CB4467FC1C6A510200D49630 /* Env.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Env.swift; sourceTree = "<group>"; };
 		CBEB4B871C89ECE40002DC71 /* JSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
+		CBEB4B891C89ED440002DC71 /* Regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +81,7 @@
 				CB4467E71C6A50CF00D49630 /* Info.plist */,
 				CB4467FC1C6A510200D49630 /* Env.swift */,
 				CBEB4B871C89ECE40002DC71 /* JSON.swift */,
+				CBEB4B891C89ED440002DC71 /* Regex.swift */,
 			);
 			path = SwiftEnv;
 			sourceTree = "<group>";
@@ -202,6 +205,7 @@
 			files = (
 				CB4467FD1C6A510200D49630 /* Env.swift in Sources */,
 				CBEB4B881C89ECE40002DC71 /* JSON.swift in Sources */,
+				CBEB4B8A1C89ED440002DC71 /* Regex.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

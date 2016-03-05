@@ -152,4 +152,22 @@ class SwiftEnvTests: XCTestCase {
             XCTAssertEqual(e, ExtractError.StringMaxLengthError(name: "q", value: "wer", maxLength: 2))
         }
     }
+
+    func testRegexp() {
+        let dp = DictParser(dict: ["q": "asdf"])
+
+        switch dp.extract("q").asString().regexp("a.*")!.readValue().result {
+        case .Success(let v):
+            XCTAssertEqual(v, "asdf")
+        case .Failure(let e):
+            XCTFail("Unexpected error \(e)")
+        }
+
+        switch dp.extract("q").asString().regexp("b.*")!.readValue().result {
+        case .Success(let v):
+            XCTFail("Unexpected value \(v)")
+        case .Failure(let e):
+            XCTAssertEqual(e, ExtractError.RegexpError(name: "q", value: "asdf", regexp: "b.*"))
+        }
+    }
 }
