@@ -1,15 +1,15 @@
 //
-//  SwiftEnvTests.swift
-//  SwiftEnvTests
+//  FlueTests.swift
+//  FlueTests
 //
 //  Created by Juri Pakaste on 09/02/16.
 //  Copyright © 2016 Juri Pakaste. All rights reserved.
 //
 
 import XCTest
-@testable import SwiftEnv
+@testable import Flue
 
-class SwiftEnvTests: XCTestCase {
+class FlueTests: XCTestCase {
     func testValueReader() {
         let env = ["asdf": "1"]
         let vp = DictParser(dict: env)

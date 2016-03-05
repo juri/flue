@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CB4467E61C6A50CF00D49630 /* SwiftEnv.h in Headers */ = {isa = PBXBuildFile; fileRef = CB4467E51C6A50CF00D49630 /* SwiftEnv.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		CB4467ED1C6A50CF00D49630 /* SwiftEnv.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB4467E21C6A50CF00D49630 /* SwiftEnv.framework */; };
-		CB4467F21C6A50CF00D49630 /* SwiftEnvTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467F11C6A50CF00D49630 /* SwiftEnvTests.swift */; };
-		CB4467FD1C6A510200D49630 /* Env.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467FC1C6A510200D49630 /* Env.swift */; };
+		CB4467E61C6A50CF00D49630 /* Flue.h in Headers */ = {isa = PBXBuildFile; fileRef = CB4467E51C6A50CF00D49630 /* Flue.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CB4467ED1C6A50CF00D49630 /* Flue.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB4467E21C6A50CF00D49630 /* Flue.framework */; };
+		CB4467FD1C6A510200D49630 /* Flue.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467FC1C6A510200D49630 /* Flue.swift */; };
+		CB6CC3F91C8B117C00996638 /* FlueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467F11C6A50CF00D49630 /* FlueTests.swift */; };
 		CBEB4B881C89ECE40002DC71 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEB4B871C89ECE40002DC71 /* JSON.swift */; };
 		CBEB4B8A1C89ED440002DC71 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEB4B891C89ED440002DC71 /* Regex.swift */; };
 /* End PBXBuildFile section */
@@ -21,18 +21,18 @@
 			containerPortal = CB4467D91C6A50CF00D49630 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = CB4467E11C6A50CF00D49630;
-			remoteInfo = SwiftEnv;
+			remoteInfo = Flue;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		CB4467E21C6A50CF00D49630 /* SwiftEnv.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftEnv.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB4467E51C6A50CF00D49630 /* SwiftEnv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftEnv.h; sourceTree = "<group>"; };
+		CB4467E21C6A50CF00D49630 /* Flue.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Flue.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB4467E51C6A50CF00D49630 /* Flue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Flue.h; sourceTree = "<group>"; };
 		CB4467E71C6A50CF00D49630 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		CB4467EC1C6A50CF00D49630 /* SwiftEnvTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftEnvTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB4467F11C6A50CF00D49630 /* SwiftEnvTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftEnvTests.swift; sourceTree = "<group>"; };
+		CB4467EC1C6A50CF00D49630 /* FlueTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlueTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB4467F11C6A50CF00D49630 /* FlueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlueTests.swift; sourceTree = "<group>"; };
 		CB4467F31C6A50CF00D49630 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		CB4467FC1C6A510200D49630 /* Env.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Env.swift; sourceTree = "<group>"; };
+		CB4467FC1C6A510200D49630 /* Flue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Flue.swift; sourceTree = "<group>"; };
 		CBEB4B871C89ECE40002DC71 /* JSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
 		CBEB4B891C89ED440002DC71 /* Regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -49,7 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB4467ED1C6A50CF00D49630 /* SwiftEnv.framework in Frameworks */,
+				CB4467ED1C6A50CF00D49630 /* Flue.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,8 +59,8 @@
 		CB4467D81C6A50CF00D49630 = {
 			isa = PBXGroup;
 			children = (
-				CB4467E41C6A50CF00D49630 /* SwiftEnv */,
-				CB4467F01C6A50CF00D49630 /* SwiftEnvTests */,
+				CB4467E41C6A50CF00D49630 /* Flue */,
+				CB4467F01C6A50CF00D49630 /* FlueTests */,
 				CB4467E31C6A50CF00D49630 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -68,31 +68,31 @@
 		CB4467E31C6A50CF00D49630 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				CB4467E21C6A50CF00D49630 /* SwiftEnv.framework */,
-				CB4467EC1C6A50CF00D49630 /* SwiftEnvTests.xctest */,
+				CB4467E21C6A50CF00D49630 /* Flue.framework */,
+				CB4467EC1C6A50CF00D49630 /* FlueTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		CB4467E41C6A50CF00D49630 /* SwiftEnv */ = {
+		CB4467E41C6A50CF00D49630 /* Flue */ = {
 			isa = PBXGroup;
 			children = (
-				CB4467E51C6A50CF00D49630 /* SwiftEnv.h */,
+				CB4467E51C6A50CF00D49630 /* Flue.h */,
 				CB4467E71C6A50CF00D49630 /* Info.plist */,
-				CB4467FC1C6A510200D49630 /* Env.swift */,
+				CB4467FC1C6A510200D49630 /* Flue.swift */,
 				CBEB4B871C89ECE40002DC71 /* JSON.swift */,
 				CBEB4B891C89ED440002DC71 /* Regex.swift */,
 			);
-			path = SwiftEnv;
+			path = Flue;
 			sourceTree = "<group>";
 		};
-		CB4467F01C6A50CF00D49630 /* SwiftEnvTests */ = {
+		CB4467F01C6A50CF00D49630 /* FlueTests */ = {
 			isa = PBXGroup;
 			children = (
-				CB4467F11C6A50CF00D49630 /* SwiftEnvTests.swift */,
+				CB4467F11C6A50CF00D49630 /* FlueTests.swift */,
 				CB4467F31C6A50CF00D49630 /* Info.plist */,
 			);
-			path = SwiftEnvTests;
+			path = FlueTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -102,16 +102,16 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB4467E61C6A50CF00D49630 /* SwiftEnv.h in Headers */,
+				CB4467E61C6A50CF00D49630 /* Flue.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		CB4467E11C6A50CF00D49630 /* SwiftEnv */ = {
+		CB4467E11C6A50CF00D49630 /* Flue */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CB4467F61C6A50CF00D49630 /* Build configuration list for PBXNativeTarget "SwiftEnv" */;
+			buildConfigurationList = CB4467F61C6A50CF00D49630 /* Build configuration list for PBXNativeTarget "Flue" */;
 			buildPhases = (
 				CB4467DD1C6A50CF00D49630 /* Sources */,
 				CB4467DE1C6A50CF00D49630 /* Frameworks */,
@@ -122,14 +122,14 @@
 			);
 			dependencies = (
 			);
-			name = SwiftEnv;
-			productName = SwiftEnv;
-			productReference = CB4467E21C6A50CF00D49630 /* SwiftEnv.framework */;
+			name = Flue;
+			productName = Flue;
+			productReference = CB4467E21C6A50CF00D49630 /* Flue.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		CB4467EB1C6A50CF00D49630 /* SwiftEnvTests */ = {
+		CB4467EB1C6A50CF00D49630 /* FlueTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CB4467F91C6A50CF00D49630 /* Build configuration list for PBXNativeTarget "SwiftEnvTests" */;
+			buildConfigurationList = CB4467F91C6A50CF00D49630 /* Build configuration list for PBXNativeTarget "FlueTests" */;
 			buildPhases = (
 				CB4467E81C6A50CF00D49630 /* Sources */,
 				CB4467E91C6A50CF00D49630 /* Frameworks */,
@@ -140,9 +140,9 @@
 			dependencies = (
 				CB4467EF1C6A50CF00D49630 /* PBXTargetDependency */,
 			);
-			name = SwiftEnvTests;
-			productName = SwiftEnvTests;
-			productReference = CB4467EC1C6A50CF00D49630 /* SwiftEnvTests.xctest */;
+			name = FlueTests;
+			productName = FlueTests;
+			productReference = CB4467EC1C6A50CF00D49630 /* FlueTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -163,7 +163,7 @@
 					};
 				};
 			};
-			buildConfigurationList = CB4467DC1C6A50CF00D49630 /* Build configuration list for PBXProject "SwiftEnv" */;
+			buildConfigurationList = CB4467DC1C6A50CF00D49630 /* Build configuration list for PBXProject "Flue" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -175,8 +175,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				CB4467E11C6A50CF00D49630 /* SwiftEnv */,
-				CB4467EB1C6A50CF00D49630 /* SwiftEnvTests */,
+				CB4467E11C6A50CF00D49630 /* Flue */,
+				CB4467EB1C6A50CF00D49630 /* FlueTests */,
 			);
 		};
 /* End PBXProject section */
@@ -203,7 +203,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB4467FD1C6A510200D49630 /* Env.swift in Sources */,
+				CB4467FD1C6A510200D49630 /* Flue.swift in Sources */,
 				CBEB4B881C89ECE40002DC71 /* JSON.swift in Sources */,
 				CBEB4B8A1C89ED440002DC71 /* Regex.swift in Sources */,
 			);
@@ -213,7 +213,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB4467F21C6A50CF00D49630 /* SwiftEnvTests.swift in Sources */,
+				CB6CC3F91C8B117C00996638 /* FlueTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,7 +222,7 @@
 /* Begin PBXTargetDependency section */
 		CB4467EF1C6A50CF00D49630 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = CB4467E11C6A50CF00D49630 /* SwiftEnv */;
+			target = CB4467E11C6A50CF00D49630 /* Flue */;
 			targetProxy = CB4467EE1C6A50CF00D49630 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -324,11 +324,11 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = SwiftEnv/Info.plist;
+				INFOPLIST_FILE = Flue/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.SwiftEnv;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.Flue;
+				PRODUCT_NAME = Flue;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -344,11 +344,11 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = SwiftEnv/Info.plist;
+				INFOPLIST_FILE = Flue/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.SwiftEnv;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.Flue;
+				PRODUCT_NAME = Flue;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -357,10 +357,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SwiftEnvTests/Info.plist;
+				INFOPLIST_FILE = FlueTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.SwiftEnvTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.FlueTests;
+				PRODUCT_NAME = FlueTests;
 			};
 			name = Debug;
 		};
@@ -368,17 +368,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SwiftEnvTests/Info.plist;
+				INFOPLIST_FILE = FlueTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.SwiftEnvTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.FlueTests;
+				PRODUCT_NAME = FlueTests;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CB4467DC1C6A50CF00D49630 /* Build configuration list for PBXProject "SwiftEnv" */ = {
+		CB4467DC1C6A50CF00D49630 /* Build configuration list for PBXProject "Flue" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CB4467F41C6A50CF00D49630 /* Debug */,
@@ -387,7 +387,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CB4467F61C6A50CF00D49630 /* Build configuration list for PBXNativeTarget "SwiftEnv" */ = {
+		CB4467F61C6A50CF00D49630 /* Build configuration list for PBXNativeTarget "Flue" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CB4467F71C6A50CF00D49630 /* Debug */,
@@ -396,7 +396,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CB4467F91C6A50CF00D49630 /* Build configuration list for PBXNativeTarget "SwiftEnvTests" */ = {
+		CB4467F91C6A50CF00D49630 /* Build configuration list for PBXNativeTarget "FlueTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CB4467FA1C6A50CF00D49630 /* Debug */,

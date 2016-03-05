@@ -1,6 +1,6 @@
 //
 //  JSON.swift
-//  SwiftEnv
+//  Flue
 //
 //  Created by Juri Pakaste on 04/03/16.
 //  Copyright © 2016 Juri Pakaste. All rights reserved.

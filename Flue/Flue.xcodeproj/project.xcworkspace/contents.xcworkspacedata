@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:SwiftEnv.xcodeproj">
+      location = "self:/Users/juri/Projects/swiftenv/Flue/Flue.xcodeproj">
    </FileRef>
 </Workspace>

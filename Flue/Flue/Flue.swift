@@ -1,6 +1,6 @@
 //
 //  Env.swift
-//  SwiftEnv
+//  Flue
 //
 //  Created by Juri Pakaste on 09/02/16.
 //  Copyright © 2016 Juri Pakaste. All rights reserved.
