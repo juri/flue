@@ -165,8 +165,8 @@ struct ConversionStep<Input, Output>: ConversionStepProtocol {
 }
 
 protocol ConversionStepProtocol {
-    typealias Input
-    typealias Output
+    associatedtype Input
+    associatedtype Output
 
     var input: () -> ConversionContext<Input, ExtractError> { get }
     var convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError> { get }
