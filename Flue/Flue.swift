@@ -8,10 +8,10 @@
 
 import Foundation
 
-class ValueParser {
+public class ValueParser {
     private let integerFormatter: NSNumberFormatter
 
-    init(locale: NSLocale = NSLocale(localeIdentifier: "POSIX")) {
+    public init(locale: NSLocale = NSLocale(localeIdentifier: "POSIX")) {
         let integerFormatter = NSNumberFormatter()
         integerFormatter.locale = locale
         integerFormatter.maximumFractionDigits = 0
@@ -30,21 +30,21 @@ class ValueParser {
     }
 }
 
-class DictParser {
+public class DictParser {
     private let vp: ValueParser
     private let dict: [String: String]
 
-    init(dict: [String: String], valueParser: ValueParser = ValueParser()) {
+    public init(dict: [String: String], valueParser: ValueParser = ValueParser()) {
         self.dict = dict
         self.vp = valueParser
     }
 
-    func extract(key: String) -> ExtractedString {
+    public func extract(key: String) -> ExtractedString {
         return self.vp.extract(key, value: self.dict[key])
     }
 }
 
-enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
+public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     case ValueMissing(name: String)
     case FormatError(name: String, value: String, expectType: String)
     case IntRangeError(name: String, value: Int, range: Range<Int>)
@@ -53,7 +53,7 @@ enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     case RegexpError(name: String, value: String, regexp: String)
     case OtherError(String)
 
-    var description: String {
+    public var description: String {
         switch self {
         case .ValueMissing(let name):
             return "Required value \(name) wasn't found"
@@ -83,7 +83,7 @@ enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     }
 }
 
-func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
+public func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
     switch (ee1, ee2) {
     case let (.ValueMissing(n1), .ValueMissing(n2)):
         return n1 == n2
@@ -104,27 +104,27 @@ func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
     }
 }
 
-enum ConversionResult<T, Error: ErrorType> {
+public enum ConversionResult<T, Error: ErrorType> {
     case Success(T)
     case Failure(Error)
 }
 
-struct OriginalValue {
+public struct OriginalValue {
     let name: String
     let value: String?
 }
 
-struct ConversionContext<T, Error: ErrorType> {
-    let originalValue: OriginalValue
+public struct ConversionContext<T, Error: ErrorType> {
+    private let originalValue: OriginalValue
     let result: ConversionResult<T, Error>
 }
 
-struct ConversionStep<Input, Output>: ConversionStepProtocol {
-    let input: () -> ConversionContext<Input, ExtractError>
-    let convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError>
-    let help: () -> [String]
+public struct ConversionStep<Input, Output>: ConversionStepProtocol {
+    public let input: () -> ConversionContext<Input, ExtractError>
+    public let convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError>
+    public let help: () -> [String]
 
-    func readValue() -> ConversionContext<Output, ExtractError> {
+    public func readValue() -> ConversionContext<Output, ExtractError> {
         let cc = self.input()
         switch cc.result {
         case .Success(let v): return ConversionContext(originalValue: cc.originalValue, result: self.convert(v, cc.originalValue))
@@ -132,7 +132,7 @@ struct ConversionStep<Input, Output>: ConversionStepProtocol {
         }
     }
 
-    func required() throws -> Output {
+    public func required() throws -> Output {
         let cc = self.readValue()
         switch cc.result {
         case .Success(let v): return v
@@ -140,7 +140,7 @@ struct ConversionStep<Input, Output>: ConversionStepProtocol {
         }
     }
 
-    func defaultValue(v: Output) -> Output {
+    public func defaultValue(v: Output) -> Output {
         let cc = self.readValue()
         switch cc.result {
         case .Success(let v): return v
@@ -148,7 +148,7 @@ struct ConversionStep<Input, Output>: ConversionStepProtocol {
         }
     }
 
-    func optional() -> Output? {
+    public func optional() -> Output? {
         let cc = self.readValue()
         switch cc.result {
         case .Success(let v): return v
@@ -156,7 +156,7 @@ struct ConversionStep<Input, Output>: ConversionStepProtocol {
         }
     }
 
-    func usage(s: String, prefix: Bool = false) -> [String] {
+    public func usage(s: String, prefix: Bool = false) -> [String] {
         if prefix {
             return [s] + self.help()
         }
@@ -164,7 +164,7 @@ struct ConversionStep<Input, Output>: ConversionStepProtocol {
     }
 }
 
-protocol ConversionStepProtocol {
+public protocol ConversionStepProtocol {
     associatedtype Input
     associatedtype Output
 
@@ -174,8 +174,8 @@ protocol ConversionStepProtocol {
     func readValue() -> ConversionContext<Output, ExtractError>
 }
 
-extension ConversionStepProtocol {
-    func asType<NewType>(convert: ((Output, OriginalValue) -> ConversionResult<NewType, ExtractError>), help: String? = nil) -> ConversionStep<Output,NewType> {
+public extension ConversionStepProtocol {
+    public func asType<NewType>(convert: ((Output, OriginalValue) -> ConversionResult<NewType, ExtractError>), help: String? = nil) -> ConversionStep<Output,NewType> {
         func input() -> ConversionContext<Output, ExtractError> {
             return self.readValue()
         }
@@ -189,7 +189,7 @@ extension ConversionStepProtocol {
         return ConversionStep(input: input, convert: convert, help: helpFunc)
     }
 
-    func asType<NewType>(convert: ((Output, OriginalValue) -> NewType?), help: String? = nil) -> ConversionStep<Output,NewType> {
+    public func asType<NewType>(convert: ((Output, OriginalValue) -> NewType?), help: String? = nil) -> ConversionStep<Output,NewType> {
         func cwrap(v: Output, ov: OriginalValue) -> ConversionResult<NewType, ExtractError> {
             if let cv = convert(v, ov) {
                 return .Success(cv)
@@ -246,7 +246,7 @@ extension ConversionStepProtocol where Output == String {
     }
 }
 
-struct ExtractedString: CustomDebugStringConvertible {
+public struct ExtractedString: CustomDebugStringConvertible {
     let name: String
     let inputValue: String?
     let parser: ValueParser
@@ -255,7 +255,7 @@ struct ExtractedString: CustomDebugStringConvertible {
         return self.inputValue
     }
 
-    var debugDescription: String {
+    public var debugDescription: String {
         return "ExtractedString name:\(self.name) inputValue:\(self.inputValue)"
     }
 
@@ -271,7 +271,7 @@ struct ExtractedString: CustomDebugStringConvertible {
         return ConversionContext(originalValue: original, result: .Success(val))
     }
 
-    func asString() -> ConversionStep<String, String> {
+    public func asString() -> ConversionStep<String, String> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<String, ExtractError> {
             return .Success(s)
         }
@@ -281,7 +281,7 @@ struct ExtractedString: CustomDebugStringConvertible {
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
     }
 
-    func asInt() -> ConversionStep<String, Int> {
+    public func asInt() -> ConversionStep<String, Int> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
             do {
                 let parsed = try self.parser.parseInt(ov.name, value: s)
@@ -299,7 +299,7 @@ struct ExtractedString: CustomDebugStringConvertible {
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
     }
 
-    func asBool() -> ConversionStep<String, Bool> {
+    public func asBool() -> ConversionStep<String, Bool> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<Bool, ExtractError> {
             let bval = (s as NSString).boolValue
             return .Success(bval)
