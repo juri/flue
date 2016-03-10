@@ -6,3 +6,4 @@ xcuserdata
 *.pbxuser
 Flue/.build
 *.xcworkspace
+.build
