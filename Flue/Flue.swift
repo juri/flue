@@ -18,14 +18,14 @@ public class ValueParser {
         self.integerFormatter = integerFormatter
     }
 
-    private func parseInt(name: String, value: String) throws -> Int {
+    private func parseInt(name: String?, value: String) throws -> Int {
         guard let n = self.integerFormatter.numberFromString(value) as? Int else {
             throw ExtractError.FormatError(name: name, value: value, expectType: "Integer")
         }
         return n
     }
 
-    public func extract(name: String, value: String?) -> ExtractedString {
+    public func extract(name: String?, value: String?) -> ExtractedString {
         return ExtractedString(name: name, inputValue: value, parser: self)
     }
 }
@@ -45,28 +45,52 @@ public class DictParser {
 }
 
 public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
-    case ValueMissing(name: String)
-    case FormatError(name: String, value: String, expectType: String)
-    case IntRangeError(name: String, value: Int, range: Range<Int>)
-    case StringMinLengthError(name: String, value: String, minLength: Int)
-    case StringMaxLengthError(name: String, value: String, maxLength: Int)
-    case RegexpError(name: String, value: String, regexp: String)
+    case ValueMissing(name: String?)
+    case FormatError(name: String?, value: String, expectType: String)
+    case IntRangeError(name: String?, value: Int, range: Range<Int>)
+    case StringMinLengthError(name: String?, value: String, minLength: Int)
+    case StringMaxLengthError(name: String?, value: String, maxLength: Int)
+    case RegexpError(name: String?, value: String, regexp: String)
     case OtherError(String)
 
     public var description: String {
         switch self {
         case .ValueMissing(let name):
-            return "Required value \(name) wasn't found"
+            if let n = name {
+                return "Required value \(n) wasn't found"
+            } else {
+                return "Required value wasn't found"
+            }
         case .FormatError(let name, let value, let expectType):
-            return "Key \"\(name)\" format error. Had value \(value), not \(expectType)"
+            if let n = name {
+                return "Key \"\(n)\" format error. Had value \(value), not \(expectType)"
+            } else {
+                return "Format error. Had value \(value), not \(expectType)"
+            }
         case let .IntRangeError(name, value, range):
-            return "Key \(name) had value \(value), not in range \(range)"
+            if let n = name {
+                return "Key \(n) had value \(value), not in range \(range)"
+            } else {
+                return "Value \(value) not in range \(range)"
+            }
         case let .StringMinLengthError(name, value, minLength):
-            return "Key \(name) had value \(value), shorter than minimum length \(minLength)"
+            if let n = name {
+                return "Key \(n) had value \(value), shorter than minimum length \(minLength)"
+            } else {
+                return "Value \(value) is shorter than minimum length \(minLength)"
+            }
         case let .StringMaxLengthError(name, value, maxLength):
-            return "Key \(name) had value \(value), longer than minimum length \(maxLength)"
+            if let n = name {
+                return "Key \(n) had value \(value), longer than minimum length \(maxLength)"
+            } else {
+                return "Value \(value) is longer than minimum length \(maxLength)"
+            }
         case let .RegexpError(name, value, regexp):
-            return "Key \(name) had value \(value) that didn't match regular expression \(regexp)"
+            if let n = name {
+                return "Key \(n) had value \(value) that didn't match regular expression \(regexp)"
+            } else {
+                return "Value \(value) didn't match regular expression \(regexp)"
+            }
         case .OtherError(let msg):
             return msg
         }
@@ -110,7 +134,7 @@ public enum ConversionResult<T, Error: ErrorType> {
 }
 
 public struct OriginalValue {
-    let name: String
+    let name: String?
     let value: String?
 }
 
@@ -247,7 +271,7 @@ extension ConversionStepProtocol where Output == String {
 }
 
 public struct ExtractedString: CustomDebugStringConvertible {
-    let name: String
+    let name: String?
     let inputValue: String?
     let parser: ValueParser
 
@@ -259,8 +283,11 @@ public struct ExtractedString: CustomDebugStringConvertible {
         return "ExtractedString name:\(self.name) inputValue:\(self.inputValue)"
     }
 
-    var help: String {
-        return "Name: \(self.name)"
+    func help(extra: String) -> [String] {
+        if let name = self.name {
+            return ["Name: \(name)", extra]
+        }
+        return [extra]
     }
 
     func inputForReader() -> ConversionContext<String, ExtractError> {
@@ -276,7 +303,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
             return .Success(s)
         }
         func help() -> [String] {
-            return [self.help, "String"]
+            return self.help("String")
         }
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
     }
@@ -293,7 +320,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
             }
         }
         func help() -> [String] {
-            return [self.help, "Integer"]
+            return self.help("Integer")
         }
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
@@ -306,7 +333,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
         }
 
         func help() -> [String] {
-            return [self.help, "True if string starts with [YyTt1-9]"]
+            return self.help("True if string starts with [YyTt1-9]")
         }
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)

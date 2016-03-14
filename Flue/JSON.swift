@@ -19,6 +19,6 @@ extension ExtractedString {
                 return .Failure(ExtractError.fromError(error))
             }
         }
-        return ConversionStep(input: self.inputForReader, convert: convert, help: { [self.help, "JSON Data"]})
+        return ConversionStep(input: self.inputForReader, convert: convert, help: { self.help("JSON Data") })
     }
 }
