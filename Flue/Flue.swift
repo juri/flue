@@ -25,7 +25,7 @@ public class ValueParser {
         return n
     }
 
-    func extract(name: String, value: String?) -> ExtractedString {
+    public func extract(name: String, value: String?) -> ExtractedString {
         return ExtractedString(name: name, inputValue: value, parser: self)
     }
 }
