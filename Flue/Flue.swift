@@ -25,7 +25,7 @@ public class ValueParser {
         return n
     }
 
-    public func extract(name: String?, value: String?) -> ExtractedString {
+    public func extract(value: String?, name: String? = nil) -> ExtractedString {
         return ExtractedString(name: name, inputValue: value, parser: self)
     }
 }
@@ -40,7 +40,7 @@ public class DictParser {
     }
 
     public func extract(key: String) -> ExtractedString {
-        return self.vp.extract(key, value: self.dict[key])
+        return self.vp.extract(self.dict[key], name: key)
     }
 }
 
