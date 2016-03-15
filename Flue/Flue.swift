@@ -8,9 +8,13 @@
 
 import Foundation
 
+/**
+ ValueParser is the starting point for extracting data from input.
+ */
 public class ValueParser {
     private let integerFormatter: NSNumberFormatter
 
+    /// Construct ValueParser for the given locale. Defaults to POSIX.
     public init(locale: NSLocale = NSLocale(localeIdentifier: "POSIX")) {
         let integerFormatter = NSNumberFormatter()
         integerFormatter.locale = locale
@@ -25,11 +29,15 @@ public class ValueParser {
         return n
     }
 
+    /// Returns an ExtractedString object that can be used to operate on the value.
     public func extract(value: String?, name: String? = nil) -> ExtractedString {
         return ExtractedString(name: name, inputValue: value, parser: self)
     }
 }
 
+/**
+ DictParser extracts values from a [String: String] dictionary.
+ */
 public class DictParser {
     private let vp: ValueParser
     private let dict: [String: String]
@@ -128,26 +136,45 @@ public func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
     }
 }
 
+/**
+ ConversionResult is a Success/Failure result enum for conversions.
+ */
 public enum ConversionResult<T, Error: ErrorType> {
     case Success(T)
     case Failure(Error)
 }
 
+/**
+ OriginalValue keeps the originally extracted value.
+ */
 public struct OriginalValue {
     let name: String?
     let value: String?
 }
 
+/**
+ ConversionContext keeps the originally extracted value and the latest conversion result.
+ */
 public struct ConversionContext<T, Error: ErrorType> {
     private let originalValue: OriginalValue
     let result: ConversionResult<T, Error>
 }
 
+/**
+ ConversionStep is one step in a chain of conversions or validations.
+ 
+ It's parametrized with three functions that provide the value handling logic:
+
+ - `input` reads the value from previous step.
+ - `convert` converts the value from `input` to the next type.
+ - `help` returns the current array of help messages.
+ */
 public struct ConversionStep<Input, Output>: ConversionStepProtocol {
     public let input: () -> ConversionContext<Input, ExtractError>
     public let convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError>
     public let help: () -> [String]
 
+    /// Returns a `ConversionContext` containing either the value from `input` processed through `convert` or the error it contained.
     public func readValue() -> ConversionContext<Output, ExtractError> {
         let cc = self.input()
         switch cc.result {
@@ -156,6 +183,8 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol {
         }
     }
 
+    /// Returns the success value from `readValue` or throws the error.
+    /// - Throws: The error contained in the `ConversionContext` returned by `readValue`.
     public func required() throws -> Output {
         let cc = self.readValue()
         switch cc.result {
@@ -164,6 +193,8 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol {
         }
     }
 
+    /// Returns the success value from `readValue` or the default value given as parameter.
+    /// - Parameter v: default value to return if `readValue`'s return value contained an error.
     public func defaultValue(v: Output) -> Output {
         let cc = self.readValue()
         switch cc.result {
@@ -172,6 +203,7 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol {
         }
     }
 
+    /// Returns an optional containing the success value from `readValue` or nil.
     public func optional() -> Output? {
         let cc = self.readValue()
         switch cc.result {
@@ -180,6 +212,10 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol {
         }
     }
 
+    /// Returns the collected help array from `help` with an additional usage string.
+    /// - Parameter s: Extra usage information string.
+    /// - Parameter prefix: If `true`, usage string will be the first element of the returned array.
+    ///   Otherwise it'll be the last element. Defaults to `false`.
     public func usage(s: String, prefix: Bool = false) -> [String] {
         if prefix {
             return [s] + self.help()
@@ -188,6 +224,9 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol {
     }
 }
 
+/**
+ Helper protocol for `ConversionStep` for adding type specific extension methods.
+ */
 public protocol ConversionStepProtocol {
     associatedtype Input
     associatedtype Output
@@ -199,6 +238,12 @@ public protocol ConversionStepProtocol {
 }
 
 public extension ConversionStepProtocol {
+    /**
+     Creates a step that converts the input value to a new type, as specified by the function in the `convert` parameter.
+
+     - Parameter convert: A function that can be used as the `convert` value in a `ConversionStep`.
+     - Parameter help: A string to use as the help string for this step. If nil, it will default to a string describing the type returned by `convert`.
+     */
     public func asType<NewType>(convert: ((Output, OriginalValue) -> ConversionResult<NewType, ExtractError>), help: String? = nil) -> ConversionStep<Output,NewType> {
         func input() -> ConversionContext<Output, ExtractError> {
             return self.readValue()
@@ -213,6 +258,13 @@ public extension ConversionStepProtocol {
         return ConversionStep(input: input, convert: convert, help: helpFunc)
     }
 
+    /**
+     Creates a step that converts the input value to a new type, as specified by the function in the `convert` parameter.
+     This variant takes a function that returns an optional, instead of a `ConversionResult`.
+
+     - Parameter convert: A function returning an optional value of the new type. It will be wrapped in a function that returns an `ExtractError.FormatError` in case of nil and that new function will be used as the `convert` value in a `ConversionStep`.
+     - Parameter help: A string to use as the help string for this step. If nil, it will default to a string describing the type returned by `convert`.
+     */
     public func asType<NewType>(convert: ((Output, OriginalValue) -> NewType?), help: String? = nil) -> ConversionStep<Output,NewType> {
         func cwrap(v: Output, ov: OriginalValue) -> ConversionResult<NewType, ExtractError> {
             if let cv = convert(v, ov) {
@@ -225,6 +277,13 @@ public extension ConversionStepProtocol {
 }
 
 extension ConversionStepProtocol where Output == Int {
+    /**
+     Creates a `ConversionStep` that checks that the input integer is in the specified range.
+     The `ConversionStep` will return a `ExtractError.IntRangeError` if the range
+     does not contain the input value.
+     
+     - Parameter r: The range the input value should be in.
+     */
     func range(r: Range<Int>) -> ConversionStep<Int, Int> {
         func input() -> ConversionContext<Int, ExtractError> {
             return self.readValue()
@@ -243,6 +302,12 @@ extension ConversionStepProtocol where Output == Int {
 }
 
 extension ConversionStepProtocol where Output == String {
+    /**
+     Creates a `ConversionStep` that checks that the input string is at least `l` characters long.
+     The `ConversionStep` will return a `ExtractError.StringMinLengthError` if it the string is shorter.
+
+     - Parameter l: The minimum length for the string.
+     */
     func minLength(l: Int) -> ConversionStep<String, String> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<String, ExtractError> {
             if s.characters.count >= l {
@@ -256,6 +321,12 @@ extension ConversionStepProtocol where Output == String {
         return ConversionStep(input: self.readValue, convert: convert, help: help)
     }
 
+    /**
+     Creates a `ConversionStep` that checks that the input string is at most `l` characters long.
+     The `ConversionStep` will return a `ExtractError.StringMaxLengthError` if the string is longer.
+
+     - Parameter l: The maximum length for the string.
+     */
     func maxLength(l: Int) -> ConversionStep<String, String> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<String, ExtractError> {
             if s.characters.count <= l {
@@ -270,6 +341,9 @@ extension ConversionStepProtocol where Output == String {
     }
 }
 
+/**
+ ExtractedString is the initially extracted value.
+ */
 public struct ExtractedString: CustomDebugStringConvertible {
     let name: String?
     let inputValue: String?
@@ -298,6 +372,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
         return ConversionContext(originalValue: original, result: .Success(val))
     }
 
+    /// Creates a `ConversionStep` that just treats the value as a String.
     public func asString() -> ConversionStep<String, String> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<String, ExtractError> {
             return .Success(s)
@@ -308,6 +383,8 @@ public struct ExtractedString: CustomDebugStringConvertible {
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
     }
 
+    /// Creates a `ConversionStep` that parses the input string as an integer, using the locale initially passed in to the `ValueParser` constructor.
+    /// The `ConversionStep` will return a `ExtractError.FormatError` if parsing fails.
     public func asInt() -> ConversionStep<String, Int> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
             do {
@@ -326,6 +403,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
     }
 
+    /// Creates a `ConversionStep` that parses the input string as a boolean, using `NSString`'s `boolValue` method.
     public func asBool() -> ConversionStep<String, Bool> {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<Bool, ExtractError> {
             let bval = (s as NSString).boolValue
