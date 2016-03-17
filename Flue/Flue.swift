@@ -52,13 +52,23 @@ public class DictParser {
     }
 }
 
+/**
+ ExtractError is an enum for the errors emitted by the built-in Flue functions.
+ */
 public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
+    /// Flue returns ValueMissing when the parser received a nil value.
     case ValueMissing(name: String?)
+    /// Flue returns FormatError when conversion to a different type fails.
     case FormatError(name: String?, value: String, expectType: String)
+    /// Flue returns IntRangeError when `range` fails on an integer value.
     case IntRangeError(name: String?, value: Int, range: Range<Int>)
+    /// Flue returns StringMinLengthError when `minLength` fails on a string value.
     case StringMinLengthError(name: String?, value: String, minLength: Int)
+    /// Flue returns StringMaxLengthError when `maxLength` fails on a string value.
     case StringMaxLengthError(name: String?, value: String, maxLength: Int)
+    /// Flue returns RegexpError when `regexp` fails on a string value.
     case RegexpError(name: String?, value: String, regexp: String)
+    /// Flue returns OtherError when an unexpected error occurs.
     case OtherError(String)
 
     public var description: String {
@@ -184,6 +194,7 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol {
     }
 
     /// Returns the success value from `readValue` or throws the error.
+    ///
     /// - Throws: The error contained in the `ConversionContext` returned by `readValue`.
     public func required() throws -> Output {
         let cc = self.readValue()
@@ -194,6 +205,7 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol {
     }
 
     /// Returns the success value from `readValue` or the default value given as parameter.
+    ///
     /// - Parameter v: default value to return if `readValue`'s return value contained an error.
     public func defaultValue(v: Output) -> Output {
         let cc = self.readValue()
@@ -213,6 +225,7 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol {
     }
 
     /// Returns the collected help array from `help` with an additional usage string.
+    ///
     /// - Parameter s: Extra usage information string.
     /// - Parameter prefix: If `true`, usage string will be the first element of the returned array.
     ///   Otherwise it'll be the last element. Defaults to `false`.
