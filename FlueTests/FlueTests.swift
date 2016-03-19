@@ -98,7 +98,7 @@ class FlueTests: XCTestCase {
 
     func testJSONWithFullConvert() {
         let vp = DictParser(dict: ["q": "{\"w\": 1}"])
-        func convert(v: AnyObject, ov: OriginalValue) -> ConversionResult<[String: Int], ExtractError> {
+        func convert(v: AnyObject, src: ConversionSource) -> ConversionResult<[String: Int], ExtractError> {
             if let vd = v as? [String: Int] {
                 return .Success(vd)
             }
@@ -110,7 +110,7 @@ class FlueTests: XCTestCase {
 
     func testJSONWithOptionalConvert() {
         let vp = DictParser(dict: ["q": "{\"w\": 1}"])
-        func convert(v: AnyObject, ov: OriginalValue) -> [String: Int]? {
+        func convert(v: AnyObject, src: ConversionSource) -> [String: Int]? {
             return v as? [String: Int]
         }
         let j = try! vp.extract("q").asJSON().asType(convert, help: "plerp").required()
@@ -119,7 +119,7 @@ class FlueTests: XCTestCase {
 
     func testJSONWithOptionalConvertFailure() {
         let vp = DictParser(dict: ["q": "{\"w\": \"e\"}"])
-        func convert(v: AnyObject, ov: OriginalValue) -> [String: Int]? {
+        func convert(v: AnyObject, src: ConversionSource) -> [String: Int]? {
             return v as? [String: Int]
         }
         do {
@@ -136,7 +136,7 @@ class FlueTests: XCTestCase {
 
     func testJSONWithOptionalConvertHelp() {
         let vp = DictParser(dict: ["q": "{\"w\": \"e\"}"])
-        func convert(v: AnyObject, ov: OriginalValue) -> [String: Int]? {
+        func convert(v: AnyObject, src: ConversionSource) -> [String: Int]? {
             return v as? [String: Int]
         }
         let help = vp.extract("q").asJSON().asType(convert).help()

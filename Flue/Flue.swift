@@ -25,6 +25,7 @@ public class ValueParser {
 
         let floatFormatter = NSNumberFormatter()
         floatFormatter.locale = locale
+        floatFormatter.maximumFractionDigits = 100
         self.floatFormatter = floatFormatter
     }
 
@@ -190,10 +191,19 @@ public struct OriginalValue {
 }
 
 /**
+ ConversionSource keeps the source of this conversion: The ValueParser and the original extracted value.
+ */
+public struct ConversionSource {
+    internal let valueParser: ValueParser
+    internal let originalValue: OriginalValue
+}
+
+
+/**
  ConversionContext keeps the originally extracted value and the latest conversion result.
  */
 public struct ConversionContext<T, Error: ErrorType> {
-    private let originalValue: OriginalValue
+    private let source: ConversionSource
     let result: ConversionResult<T, Error>
 }
 
@@ -208,15 +218,15 @@ public struct ConversionContext<T, Error: ErrorType> {
  */
 public struct ConversionStep<Input, Output>: ConversionStepProtocol {
     public let input: () -> ConversionContext<Input, ExtractError>
-    public let convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError>
+    public let convert: (Input, ConversionSource) -> ConversionResult<Output, ExtractError>
     public let help: () -> [String]
 
     /// Returns a `ConversionContext` containing either the value from `input` processed through `convert` or the error it contained.
     public func readValue() -> ConversionContext<Output, ExtractError> {
         let cc = self.input()
         switch cc.result {
-        case .Success(let v): return ConversionContext(originalValue: cc.originalValue, result: self.convert(v, cc.originalValue))
-        case .Failure(let e): return ConversionContext(originalValue: cc.originalValue, result: .Failure(e))
+        case .Success(let v): return ConversionContext(source: cc.source, result: self.convert(v, cc.source))
+        case .Failure(let e): return ConversionContext(source: cc.source, result: .Failure(e))
         }
     }
 
@@ -272,7 +282,7 @@ public protocol ConversionStepProtocol {
     associatedtype Output
 
     var input: () -> ConversionContext<Input, ExtractError> { get }
-    var convert: (Input, OriginalValue) -> ConversionResult<Output, ExtractError> { get }
+    var convert: (Input, ConversionSource) -> ConversionResult<Output, ExtractError> { get }
     var help: () -> [String] { get }
     func readValue() -> ConversionContext<Output, ExtractError>
 }
@@ -284,7 +294,7 @@ public extension ConversionStepProtocol {
      - Parameter convert: A function that can be used as the `convert` value in a `ConversionStep`.
      - Parameter help: A string to use as the help string for this step. If nil, it will default to a string describing the type returned by `convert`.
      */
-    public func asType<NewType>(convert: ((Output, OriginalValue) -> ConversionResult<NewType, ExtractError>), help: String? = nil) -> ConversionStep<Output,NewType> {
+    public func asType<NewType>(convert: ((Output, ConversionSource) -> ConversionResult<NewType, ExtractError>), help: String? = nil) -> ConversionStep<Output,NewType> {
         func helpFunc() -> [String] {
             if let h = help {
                 return self.help() + [h]
@@ -302,12 +312,12 @@ public extension ConversionStepProtocol {
      - Parameter convert: A function returning an optional value of the new type. It will be wrapped in a function that returns an `ExtractError.FormatError` in case of nil and that new function will be used as the `convert` value in a `ConversionStep`.
      - Parameter help: A string to use as the help string for this step. If nil, it will default to a string describing the type returned by `convert`.
      */
-    public func asType<NewType>(convert: ((Output, OriginalValue) -> NewType?), help: String? = nil) -> ConversionStep<Output,NewType> {
-        func cwrap(v: Output, ov: OriginalValue) -> ConversionResult<NewType, ExtractError> {
-            if let cv = convert(v, ov) {
+    public func asType<NewType>(convert: ((Output, ConversionSource) -> NewType?), help: String? = nil) -> ConversionStep<Output,NewType> {
+        func cwrap(v: Output, src: ConversionSource) -> ConversionResult<NewType, ExtractError> {
+            if let cv = convert(v, src) {
                 return .Success(cv)
             }
-            return .Failure(ExtractError.FormatError(name: ov.name, value: ov.value ?? "", expectType: "\(NewType.self)"))
+            return .Failure(ExtractError.FormatError(name: src.originalValue.name, value: src.originalValue.value ?? "", expectType: "\(NewType.self)"))
         }
         return self.asType(cwrap, help: help)
     }
@@ -322,11 +332,11 @@ extension ConversionStepProtocol where Output == Int {
      - Parameter r: The range the input value should be in.
      */
     func range(r: Range<Int>) -> ConversionStep<Int, Int> {
-        func convert(i: Int, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
+        func convert(i: Int, src: ConversionSource) -> ConversionResult<Int, ExtractError> {
             if r.contains(i) {
                 return .Success(i)
             }
-            return .Failure(ExtractError.IntRangeError(name: ov.name, value: i, range: r))
+            return .Failure(ExtractError.IntRangeError(name: src.originalValue.name, value: i, range: r))
         }
         func help() -> [String] {
             return self.help() + ["Range: \(r)"]
@@ -343,11 +353,11 @@ extension ConversionStepProtocol where Output == String {
      - Parameter l: The minimum length for the string.
      */
     func minLength(l: Int) -> ConversionStep<String, String> {
-        func convert(s: String, ov: OriginalValue) -> ConversionResult<String, ExtractError> {
+        func convert(s: String, src: ConversionSource) -> ConversionResult<String, ExtractError> {
             if s.characters.count >= l {
                 return .Success(s)
             }
-            return .Failure(ExtractError.StringMinLengthError(name: ov.name, value: s, minLength: l))
+            return .Failure(ExtractError.StringMinLengthError(name: src.originalValue.name, value: s, minLength: l))
         }
         func help() -> [String] {
             return self.help() + ["Minimum length: \(l)"]
@@ -362,11 +372,11 @@ extension ConversionStepProtocol where Output == String {
      - Parameter l: The maximum length for the string.
      */
     func maxLength(l: Int) -> ConversionStep<String, String> {
-        func convert(s: String, ov: OriginalValue) -> ConversionResult<String, ExtractError> {
+        func convert(s: String, src: ConversionSource) -> ConversionResult<String, ExtractError> {
             if s.characters.count <= l {
                 return .Success(s)
             }
-            return .Failure(ExtractError.StringMaxLengthError(name: ov.name, value: s, maxLength: l))
+            return .Failure(ExtractError.StringMaxLengthError(name: src.originalValue.name, value: s, maxLength: l))
         }
         func help() -> [String] {
             return self.help() + ["Maximum length: \(l)"]
@@ -382,12 +392,14 @@ extension ConversionStepProtocol where Output == Double {
      - Parameter limit: The lower non-inclusive bound for the value.
      */
     func greaterThan(limit: Double) -> ConversionStep<Double, Double> {
-        func convert(d: Double, ov: OriginalValue) -> ConversionResult<Double, ExtractError> {
+        func convert(d: Double, src: ConversionSource) -> ConversionResult<Double, ExtractError> {
             if d > limit {
                 return .Success(d)
             }
-            // TODO: use ValueParser's formatters
-            return .Failure(ExtractError.ValueTooSmallError(name: ov.name, value: ov.value!, shouldBeGreaterThan: "\(limit)"))
+            return .Failure(ExtractError.ValueTooSmallError(
+                name: src.originalValue.name,
+                value: src.originalValue.value!,
+                shouldBeGreaterThan: src.valueParser.floatFormatter.stringFromNumber(limit)!))
         }
         func help() -> [String] {
             return self.help() + ["Must be greater than: \(limit)"]
@@ -401,12 +413,14 @@ extension ConversionStepProtocol where Output == Double {
      - Parameter limit: The upper non-inclusive bound for the value.
      */
     func lessThan(limit: Double) -> ConversionStep<Double, Double> {
-        func convert(d: Double, ov: OriginalValue) -> ConversionResult<Double, ExtractError> {
+        func convert(d: Double, src: ConversionSource) -> ConversionResult<Double, ExtractError> {
             if d < limit {
                 return .Success(d)
             }
-            // TODO: use ValueParser's formatters
-            return .Failure(ExtractError.ValueTooLargeError(name: ov.name, value: ov.value!, shouldBeLessThan: "\(limit)"))
+            return .Failure(ExtractError.ValueTooLargeError(
+                name: src.originalValue.name,
+                value: src.originalValue.value!,
+                shouldBeLessThan: src.valueParser.floatFormatter.stringFromNumber(limit)!))
         }
         func help() -> [String] {
             return self.help() + ["Must be less than: \(limit)"]
@@ -439,16 +453,15 @@ public struct ExtractedString: CustomDebugStringConvertible {
     }
 
     func inputForReader() -> ConversionContext<String, ExtractError> {
-        let original = OriginalValue(name: self.name, value: self.inputValue)
         guard let val = self.inputValue else {
-            return ConversionContext(originalValue: original, result: .Failure(.ValueMissing(name: self.name)))
+            return ConversionContext(source: self.conversionSource, result: .Failure(.ValueMissing(name: self.name)))
         }
-        return ConversionContext(originalValue: original, result: .Success(val))
+        return ConversionContext(source: self.conversionSource, result: .Success(val))
     }
 
     /// Creates a `ConversionStep` that just treats the value as a String.
     public func asString() -> ConversionStep<String, String> {
-        func convert(s: String, ov: OriginalValue) -> ConversionResult<String, ExtractError> {
+        func convert(s: String, src: ConversionSource) -> ConversionResult<String, ExtractError> {
             return .Success(s)
         }
         func help() -> [String] {
@@ -460,9 +473,9 @@ public struct ExtractedString: CustomDebugStringConvertible {
     /// Creates a `ConversionStep` that parses the input string as an integer, using the locale initially passed in to the `ValueParser` constructor.
     /// The `ConversionStep` will return a `ExtractError.FormatError` if parsing fails.
     public func asInt() -> ConversionStep<String, Int> {
-        func convert(s: String, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
+        func convert(s: String, src: ConversionSource) -> ConversionResult<Int, ExtractError> {
             do {
-                let parsed = try self.parser.parseInt(ov.name, value: s)
+                let parsed = try self.parser.parseInt(src.originalValue.name, value: s)
                 return .Success(parsed)
             } catch let err as ExtractError {
                 return .Failure(err)
@@ -480,9 +493,9 @@ public struct ExtractedString: CustomDebugStringConvertible {
     /// Creates a `ConversionStep` that parses the input string as a double, using the locale initially passed in to the `ValueParser` constructor.
     /// The `ConversionStep` will return a `ExtractError.FormatError` if parsing fails.
     public func asDouble() -> ConversionStep<String, Double> {
-        func convert(s: String, ov: OriginalValue) -> ConversionResult<Double, ExtractError> {
+        func convert(s: String, src: ConversionSource) -> ConversionResult<Double, ExtractError> {
             do {
-                let parsed = try self.parser.parseDouble(ov.name, value: s)
+                let parsed = try self.parser.parseDouble(src.originalValue.name, value: s)
                 return .Success(parsed)
             } catch let err as ExtractError {
                 return .Failure(err)
@@ -499,7 +512,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
 
     /// Creates a `ConversionStep` that parses the input string as a boolean, using `NSString`'s `boolValue` method.
     public func asBool() -> ConversionStep<String, Bool> {
-        func convert(s: String, ov: OriginalValue) -> ConversionResult<Bool, ExtractError> {
+        func convert(s: String, src: ConversionSource) -> ConversionResult<Bool, ExtractError> {
             let bval = (s as NSString).boolValue
             return .Success(bval)
         }
@@ -509,5 +522,9 @@ public struct ExtractedString: CustomDebugStringConvertible {
         }
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
+    }
+
+    private var conversionSource: ConversionSource {
+        return ConversionSource(valueParser: self.parser, originalValue: OriginalValue(name: self.name, value: self.inputValue))
     }
 }

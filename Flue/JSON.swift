@@ -11,7 +11,7 @@ import Foundation
 extension ExtractedString {
     /// Parses the input string as JSON.
     func asJSON(allowFragments: Bool = false) -> ConversionStep<String, AnyObject> {
-        func convert(s: String, ov: OriginalValue) -> ConversionResult<AnyObject, ExtractError> {
+        func convert(s: String, src: ConversionSource) -> ConversionResult<AnyObject, ExtractError> {
             do {
                 let opts: NSJSONReadingOptions = allowFragments ? [.AllowFragments] : []
                 let ob = try NSJSONSerialization.JSONObjectWithData(s.dataUsingEncoding(NSUTF8StringEncoding)!, options: opts)
