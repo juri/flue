@@ -285,9 +285,6 @@ public extension ConversionStepProtocol {
      - Parameter help: A string to use as the help string for this step. If nil, it will default to a string describing the type returned by `convert`.
      */
     public func asType<NewType>(convert: ((Output, OriginalValue) -> ConversionResult<NewType, ExtractError>), help: String? = nil) -> ConversionStep<Output,NewType> {
-        func input() -> ConversionContext<Output, ExtractError> {
-            return self.readValue()
-        }
         func helpFunc() -> [String] {
             if let h = help {
                 return self.help() + [h]
@@ -295,7 +292,7 @@ public extension ConversionStepProtocol {
                 return self.help() + ["Type: \(NewType.self)"]
             }
         }
-        return ConversionStep(input: input, convert: convert, help: helpFunc)
+        return ConversionStep(input: self.readValue, convert: convert, help: helpFunc)
     }
 
     /**
@@ -325,9 +322,6 @@ extension ConversionStepProtocol where Output == Int {
      - Parameter r: The range the input value should be in.
      */
     func range(r: Range<Int>) -> ConversionStep<Int, Int> {
-        func input() -> ConversionContext<Int, ExtractError> {
-            return self.readValue()
-        }
         func convert(i: Int, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
             if r.contains(i) {
                 return .Success(i)
@@ -337,7 +331,7 @@ extension ConversionStepProtocol where Output == Int {
         func help() -> [String] {
             return self.help() + ["Range: \(r)"]
         }
-        return ConversionStep(input: input, convert: convert, help: help)
+        return ConversionStep(input: self.readValue, convert: convert, help: help)
     }
 }
 
