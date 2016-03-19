@@ -10,8 +10,8 @@ import XCTest
 @testable import Flue
 
 class FlueTests: XCTestCase {
-    func testValueReader() {
-        let env = ["asdf": "1"]
+    func testValueReader_Numbers() {
+        let env = ["asdf": "1", "d": "1.2345"]
         let vp = DictParser(dict: env)
         XCTAssertEqual(try! vp.extract("asdf").asInt().required(), 1)
         XCTAssertEqual(try! vp.extract("asdf").asInt().range(0...5).required(), 1)
@@ -19,6 +19,9 @@ class FlueTests: XCTestCase {
         XCTAssertEqual(vp.extract("zap").asInt().range(2...5).defaultValue(2), 2)
         XCTAssertEqual(vp.extract("zap").asInt().defaultValue(2), 2)
         XCTAssertNil(vp.extract("asdf").asInt().range(2...5).optional())
+        XCTAssertEqualWithAccuracy(try! vp.extract("d").asDouble().required(), 1.2345, accuracy: 0.00001)
+        XCTAssertNil(vp.extract("d").asInt().optional())
+
         do {
             try vp.extract("zap").asInt().required()
             XCTFail("Expected an exception")
@@ -40,6 +43,25 @@ class FlueTests: XCTestCase {
             return
         }
     }
+
+    func testValueReader_Numbers_With_Locale() {
+        let env = ["i1": "1", "d1": "1.2345", "d2": "2,3456"]
+        let vp = DictParser(dict: env, valueParser: ValueParser(locale: NSLocale(localeIdentifier: "fi_FI")))
+        XCTAssertEqual(try! vp.extract("i1").asInt().required(), 1)
+        XCTAssertNil(vp.extract("d1").asDouble().optional())
+        XCTAssertEqualWithAccuracy(try! vp.extract("d2").asDouble().required(), 2.3456, accuracy: 0.00001)
+        XCTAssertNil(vp.extract("d1").asInt().optional())
+        XCTAssertNil(vp.extract("d2").asInt().optional())
+    }
+
+    func testValueReader_Double_limits() {
+        let env = ["d1": "1.2345"]
+        let dp = DictParser(dict: env)
+        XCTAssertEqualWithAccuracy(try! dp.extract("d1").asDouble().greaterThan(1.2344).lessThan(1.2346).required(), 1.2345, accuracy: 0.00001)
+        XCTAssertNil(dp.extract("d1").asDouble().greaterThan(1.2346).optional())
+        XCTAssertNil(dp.extract("d1").asDouble().lessThan(1.2344).optional())
+    }
+
 
     func testValueReader_Bool() {
         let env = ["1": "Y", "2": "y", "3": "yeeeees", "4": "true", "5": "TRUE", "6": "n", "7": "m", "8": "f"]

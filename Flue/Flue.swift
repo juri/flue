@@ -13,18 +13,31 @@ import Foundation
  */
 public class ValueParser {
     private let integerFormatter: NSNumberFormatter
+    private let floatFormatter: NSNumberFormatter
 
     /// Construct ValueParser for the given locale. Defaults to POSIX.
     public init(locale: NSLocale = NSLocale(localeIdentifier: "POSIX")) {
         let integerFormatter = NSNumberFormatter()
         integerFormatter.locale = locale
         integerFormatter.maximumFractionDigits = 0
+        integerFormatter.allowsFloats = false
         self.integerFormatter = integerFormatter
+
+        let floatFormatter = NSNumberFormatter()
+        floatFormatter.locale = locale
+        self.floatFormatter = floatFormatter
     }
 
     private func parseInt(name: String?, value: String) throws -> Int {
         guard let n = self.integerFormatter.numberFromString(value) as? Int else {
             throw ExtractError.FormatError(name: name, value: value, expectType: "Integer")
+        }
+        return n
+    }
+
+    private func parseDouble(name: String?, value: String) throws -> Double {
+        guard let n = self.floatFormatter.numberFromString(value) as? Double else {
+            throw ExtractError.FormatError(name: name, value: value, expectType: "Double")
         }
         return n
     }
@@ -62,6 +75,8 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     case FormatError(name: String?, value: String, expectType: String)
     /// Flue returns IntRangeError when `range` fails on an integer value.
     case IntRangeError(name: String?, value: Int, range: Range<Int>)
+    case ValueTooSmallError(name: String?, value: String, shouldBeGreaterThan: String)
+    case ValueTooLargeError(name: String?, value: String, shouldBeLessThan: String)
     /// Flue returns StringMinLengthError when `minLength` fails on a string value.
     case StringMinLengthError(name: String?, value: String, minLength: Int)
     /// Flue returns StringMaxLengthError when `maxLength` fails on a string value.
@@ -90,6 +105,18 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
                 return "Key \(n) had value \(value), not in range \(range)"
             } else {
                 return "Value \(value) not in range \(range)"
+            }
+        case let .ValueTooLargeError(name, value, limit):
+            if let n = name {
+                return "Key \(n) had value \(value), must be smaller than \(limit)"
+            } else {
+                return "Value \(value) not smaller than \(limit)"
+            }
+        case let .ValueTooSmallError(name, value, limit):
+            if let n = name {
+                return "Key \(n) had value \(value), must be larger than \(limit)"
+            } else {
+                return "Value \(value) not larger than \(limit)"
             }
         case let .StringMinLengthError(name, value, minLength):
             if let n = name {
@@ -354,6 +381,46 @@ extension ConversionStepProtocol where Output == String {
     }
 }
 
+extension ConversionStepProtocol where Output == Double {
+    /**
+     Creates a `ConversionStep` that checks that the input double is greater than `limit`.
+     
+     - Parameter limit: The lower non-inclusive bound for the value.
+     */
+    func greaterThan(limit: Double) -> ConversionStep<Double, Double> {
+        func convert(d: Double, ov: OriginalValue) -> ConversionResult<Double, ExtractError> {
+            if d > limit {
+                return .Success(d)
+            }
+            // TODO: use ValueParser's formatters
+            return .Failure(ExtractError.ValueTooSmallError(name: ov.name, value: ov.value!, shouldBeGreaterThan: "\(limit)"))
+        }
+        func help() -> [String] {
+            return self.help() + ["Must be greater than: \(limit)"]
+        }
+        return ConversionStep(input: self.readValue, convert: convert, help: help)
+    }
+
+    /**
+     Creates a `ConversionStep` that checks that the input double is less than `limit`.
+
+     - Parameter limit: The upper non-inclusive bound for the value.
+     */
+    func lessThan(limit: Double) -> ConversionStep<Double, Double> {
+        func convert(d: Double, ov: OriginalValue) -> ConversionResult<Double, ExtractError> {
+            if d < limit {
+                return .Success(d)
+            }
+            // TODO: use ValueParser's formatters
+            return .Failure(ExtractError.ValueTooLargeError(name: ov.name, value: ov.value!, shouldBeLessThan: "\(limit)"))
+        }
+        func help() -> [String] {
+            return self.help() + ["Must be less than: \(limit)"]
+        }
+        return ConversionStep(input: self.readValue, convert: convert, help: help)
+    }
+}
+
 /**
  ExtractedString is the initially extracted value.
  */
@@ -402,6 +469,26 @@ public struct ExtractedString: CustomDebugStringConvertible {
         func convert(s: String, ov: OriginalValue) -> ConversionResult<Int, ExtractError> {
             do {
                 let parsed = try self.parser.parseInt(ov.name, value: s)
+                return .Success(parsed)
+            } catch let err as ExtractError {
+                return .Failure(err)
+            } catch {
+                return .Failure(ExtractError.fromError(error))
+            }
+        }
+        func help() -> [String] {
+            return self.help("Integer")
+        }
+
+        return ConversionStep(input: self.inputForReader, convert: convert, help: help)
+    }
+
+    /// Creates a `ConversionStep` that parses the input string as a double, using the locale initially passed in to the `ValueParser` constructor.
+    /// The `ConversionStep` will return a `ExtractError.FormatError` if parsing fails.
+    public func asDouble() -> ConversionStep<String, Double> {
+        func convert(s: String, ov: OriginalValue) -> ConversionResult<Double, ExtractError> {
+            do {
+                let parsed = try self.parser.parseDouble(ov.name, value: s)
                 return .Success(parsed)
             } catch let err as ExtractError {
                 return .Failure(err)
