@@ -10,6 +10,13 @@ import XCTest
 @testable import Flue
 
 class FlueTests: XCTestCase {
+    func testDF() {
+        let df = NSDateFormatter()
+        df.dateFormat = "H:mm"
+        let d = df.dateFromString("16:31")!
+        print("d: ", d)
+    }
+
     func testValueReader_Numbers() {
         let env = ["asdf": "1", "d": "1.2345"]
         let vp = DictParser(dict: env)
@@ -75,6 +82,29 @@ class FlueTests: XCTestCase {
         XCTAssertFalse(try! vp.extract("6").asBool().required())
         XCTAssertFalse(try! vp.extract("7").asBool().required())
         XCTAssertFalse(try! vp.extract("8").asBool().required())
+    }
+
+    func date(year: Int, _ month: Int, _ day: Int, _ hour: Int, _ minute: Int, _ second: Int, _ timeZone: NSTimeZone) -> NSDate {
+        let comps = NSDateComponents()
+        comps.year = year
+        comps.month = month
+        comps.day = day
+        comps.hour = hour
+        comps.minute = minute
+        comps.second = second
+        comps.timeZone = timeZone
+        comps.calendar = NSCalendar(identifier: NSCalendarIdentifierGregorian)!
+        return comps.date!
+    }
+
+    func testValueReader_Date() {
+        let env = ["date1": "2016-03-21T17:33:00+02:00"]
+        let dp = DictParser(dict: env)
+        let df = NSDateFormatter()
+        df.calendar = NSCalendar(identifier: NSCalendarIdentifierGregorian)!
+        df.dateFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ssZZZZZ"
+        let tz = NSTimeZone(forSecondsFromGMT: 60 * 60 * 2)
+        XCTAssertEqualWithAccuracy(try! dp.extract("date1").asDate(df).after(date(2016, 03, 21, 17, 32, 0, tz)).before(date(2016, 03, 21, 17, 34, 0, tz)).required().timeIntervalSinceReferenceDate, date(2016, 03, 21, 17, 33, 0, tz).timeIntervalSinceReferenceDate, accuracy: 1)
     }
 
     func testHelp() {

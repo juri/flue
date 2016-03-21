@@ -14,6 +14,7 @@ import Foundation
 public class ValueParser {
     private let integerFormatter: NSNumberFormatter
     private let floatFormatter: NSNumberFormatter
+    private let dateFormatter: NSDateFormatter
 
     /// Construct ValueParser for the given locale. Defaults to POSIX.
     public init(locale: NSLocale = NSLocale(localeIdentifier: "POSIX")) {
@@ -27,6 +28,12 @@ public class ValueParser {
         floatFormatter.locale = locale
         floatFormatter.maximumFractionDigits = 100
         self.floatFormatter = floatFormatter
+
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.locale = locale
+        dateFormatter.timeStyle = .ShortStyle
+        dateFormatter.dateStyle = .ShortStyle
+        self.dateFormatter = dateFormatter
     }
 
     private func parseInt(name: String?, value: String) throws -> Int {
@@ -84,6 +91,12 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     case StringMaxLengthError(name: String?, value: String, maxLength: Int)
     /// Flue returns RegexpError when `regexp` fails on a string value.
     case RegexpError(name: String?, value: String, regexp: String)
+    /// Flue returns DateFormatError when `value` couldn't be parsed as a NSDate with `format`.
+    case DateFormatError(name: String?, value: String, format: String)
+    /// Flue returns DateTooEarlyError when `value` represented a date that was earlier than `limit`.
+    case DateTooEarlyError(name: String?, value: NSString, limit: NSString)
+    /// Flue returns DateTooLateError when `value` represented a date that was later than `limit`.
+    case DateTooLateError(name: String?, value: NSString, limit: NSString)
     /// Flue returns OtherError when an unexpected error occurs.
     case OtherError(String)
 
@@ -137,6 +150,21 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
             } else {
                 return "Value \(value) didn't match regular expression \(regexp)"
             }
+        case let .DateFormatError(name, value, format):
+            if let n = name {
+                return "Key \(n) had value \(value) that couldn't be parsed as date with format \(format)"
+            }
+            return "Value \(value) couldn't be parsed as date with format \(format)"
+        case let .DateTooEarlyError(name, value, limit):
+            if let n = name {
+                return "Key \(n) had value \(value), must be after \(limit)"
+            }
+            return "Date was \(value), must be after \(limit)"
+        case let .DateTooLateError(name, value, limit):
+            if let n = name {
+                return "Key \(n) had value \(value), must be before \(limit)"
+            }
+            return "Date was \(value), must be before \(limit)"
         case .OtherError(let msg):
             return msg
         }
@@ -429,6 +457,42 @@ extension ConversionStepProtocol where Output == Double {
     }
 }
 
+extension ConversionStepProtocol where Output == NSDate {
+    func before(limit: NSDate) -> ConversionStep<NSDate, NSDate> {
+        func convert(d: NSDate, src: ConversionSource) -> ConversionResult<NSDate, ExtractError> {
+            if d.earlierDate(limit) == d {
+                return .Success(d)
+            }
+            return .Failure(ExtractError.DateTooLateError(
+                name: src.originalValue.name,
+                value: src.originalValue.value!,
+                limit: src.valueParser.dateFormatter.stringFromDate(limit)))
+        }
+        func help() -> [String] {
+            return self.help() + ["Must be before \(limit)"]
+        }
+
+        return ConversionStep(input: self.readValue, convert: convert, help: help)
+    }
+
+    func after(limit: NSDate) -> ConversionStep<NSDate, NSDate> {
+        func convert(d: NSDate, src: ConversionSource) -> ConversionResult<NSDate, ExtractError> {
+            if d.laterDate(limit) == d {
+                return .Success(d)
+            }
+            return .Failure(ExtractError.DateTooEarlyError(
+                name: src.originalValue.name,
+                value: src.originalValue.value!,
+                limit: src.valueParser.dateFormatter.stringFromDate(limit)))
+        }
+        func help() -> [String] {
+            return self.help() + ["Must be after \(limit)"]
+        }
+
+        return ConversionStep(input: self.readValue, convert: convert, help: help)
+    }
+}
+
 /**
  ExtractedString is the initially extracted value.
  */
@@ -519,6 +583,21 @@ public struct ExtractedString: CustomDebugStringConvertible {
 
         func help() -> [String] {
             return self.help("True if string starts with [YyTt1-9]")
+        }
+
+        return ConversionStep(input: self.inputForReader, convert: convert, help: help)
+    }
+
+    public func asDate(df: NSDateFormatter) -> ConversionStep<String, NSDate> {
+        func convert(s: String, src: ConversionSource) -> ConversionResult<NSDate, ExtractError> {
+            if let parsed = df.dateFromString(s) {
+                return .Success(parsed)
+            }
+            return .Failure(ExtractError.DateFormatError(name: src.originalValue.name, value: s, format: df.dateFormat))
+        }
+
+        func help() -> [String] {
+            return self.help("Date with format \(df.dateFormat)")
         }
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help)
