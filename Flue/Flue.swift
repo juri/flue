@@ -381,7 +381,7 @@ extension ConversionStepProtocol where Output == String {
             return .Failure(ExtractError.StringMinLengthError(name: ctx.originalValue.name, value: s, minLength: l))
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(ctx) + ["Minimum length: \(l)"]
+            return self.help(ctx) + ["Minimum length: \(ctx.valueParser.integerFormatter.stringFromNumber(l)!)"]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
@@ -400,7 +400,7 @@ extension ConversionStepProtocol where Output == String {
             return .Failure(ExtractError.StringMaxLengthError(name: ctx.originalValue.name, value: s, maxLength: l))
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(ctx) + ["Maximum length: \(l)"]
+            return self.help(ctx) + ["Maximum length: \(ctx.valueParser.integerFormatter.stringFromNumber(l)!)"]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
@@ -423,7 +423,7 @@ extension ConversionStepProtocol where Output == Double {
                 shouldBeGreaterThan: ctx.valueParser.floatFormatter.stringFromNumber(limit)!))
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(ctx) + ["Must be greater than: \(limit)"]
+            return self.help(ctx) + ["Must be greater than: \(ctx.valueParser.floatFormatter.stringFromNumber(limit)!)"]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
@@ -444,7 +444,7 @@ extension ConversionStepProtocol where Output == Double {
                 shouldBeLessThan: ctx.valueParser.floatFormatter.stringFromNumber(limit)!))
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(ctx) + ["Must be less than: \(limit)"]
+            return self.help(ctx) + ["Must be less than: \(ctx.valueParser.floatFormatter.stringFromNumber(limit)!)"]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
@@ -462,7 +462,7 @@ extension ConversionStepProtocol where Output == NSDate {
                 limit: ctx.valueParser.dateFormatter.stringFromDate(limit)))
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(ctx) + ["Must be before \(limit)"]
+            return self.help(ctx) + ["Must be before \(ctx.valueParser.dateFormatter.stringFromDate(limit))"]
         }
 
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
@@ -479,7 +479,7 @@ extension ConversionStepProtocol where Output == NSDate {
                 limit: ctx.valueParser.dateFormatter.stringFromDate(limit)))
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(ctx) + ["Must be after \(limit)"]
+            return self.help(ctx) + ["Must be after \(ctx.valueParser.dateFormatter.stringFromDate(limit))"]
         }
 
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
