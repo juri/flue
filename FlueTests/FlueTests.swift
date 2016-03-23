@@ -128,7 +128,7 @@ class FlueTests: XCTestCase {
 
     func testJSONWithFullConvert() {
         let vp = DictParser(dict: ["q": "{\"w\": 1}"])
-        func convert(v: AnyObject, src: ConversionSource) -> ConversionResult<[String: Int], ExtractError> {
+        func convert(v: AnyObject, ctx: ConversionContext) -> ConversionResult<[String: Int], ExtractError> {
             if let vd = v as? [String: Int] {
                 return .Success(vd)
             }
@@ -140,7 +140,7 @@ class FlueTests: XCTestCase {
 
     func testJSONWithOptionalConvert() {
         let vp = DictParser(dict: ["q": "{\"w\": 1}"])
-        func convert(v: AnyObject, src: ConversionSource) -> [String: Int]? {
+        func convert(v: AnyObject, ctx: ConversionContext) -> [String: Int]? {
             return v as? [String: Int]
         }
         let j = try! vp.extract("q").asJSON().asType(convert, help: "plerp").required()
@@ -149,7 +149,7 @@ class FlueTests: XCTestCase {
 
     func testJSONWithOptionalConvertFailure() {
         let vp = DictParser(dict: ["q": "{\"w\": \"e\"}"])
-        func convert(v: AnyObject, src: ConversionSource) -> [String: Int]? {
+        func convert(v: AnyObject, ctx: ConversionContext) -> [String: Int]? {
             return v as? [String: Int]
         }
         do {
@@ -166,7 +166,7 @@ class FlueTests: XCTestCase {
 
     func testJSONWithOptionalConvertHelp() {
         let vp = DictParser(dict: ["q": "{\"w\": \"e\"}"])
-        func convert(v: AnyObject, src: ConversionSource) -> [String: Int]? {
+        func convert(v: AnyObject, ctx: ConversionContext) -> [String: Int]? {
             return v as? [String: Int]
         }
         let help = vp.extract("q").asJSON().asType(convert).help()
@@ -176,28 +176,28 @@ class FlueTests: XCTestCase {
     func testStringLength() {
         let vp = DictParser(dict: ["q": "wer"])
 
-        switch vp.extract("q").asString().minLength(1).readValue().result {
+        switch vp.extract("q").asString().minLength(1).readValue() {
         case .Success(let v):
             XCTAssertEqual(v, "wer")
         case .Failure(let e):
             XCTFail("Unexpected error \(e)")
         }
 
-        switch vp.extract("q").asString().minLength(4).readValue().result {
+        switch vp.extract("q").asString().minLength(4).readValue() {
         case .Success(let v):
             XCTFail("Unexpected success \(v)")
         case .Failure(let e):
             XCTAssertEqual(e, ExtractError.StringMinLengthError(name: "q", value: "wer", minLength: 4))
         }
 
-        switch vp.extract("q").asString().maxLength(4).readValue().result {
+        switch vp.extract("q").asString().maxLength(4).readValue() {
         case .Success(let v):
             XCTAssertEqual(v, "wer")
         case .Failure(let e):
             XCTFail("Unexpected error \(e)")
         }
 
-        switch vp.extract("q").asString().maxLength(2).readValue().result {
+        switch vp.extract("q").asString().maxLength(2).readValue() {
         case .Success(let v):
             XCTFail("Unexpected success \(v)")
         case .Failure(let e):
@@ -208,14 +208,14 @@ class FlueTests: XCTestCase {
     func testRegexp() {
         let dp = DictParser(dict: ["q": "asdf"])
 
-        switch dp.extract("q").asString().regexp("a.*")!.readValue().result {
+        switch dp.extract("q").asString().regexp("a.*")!.readValue() {
         case .Success(let v):
             XCTAssertEqual(v, "asdf")
         case .Failure(let e):
             XCTFail("Unexpected error \(e)")
         }
 
-        switch dp.extract("q").asString().regexp("b.*")!.readValue().result {
+        switch dp.extract("q").asString().regexp("b.*")!.readValue() {
         case .Success(let v):
             XCTFail("Unexpected value \(v)")
         case .Failure(let e):

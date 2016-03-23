@@ -19,17 +19,17 @@ extension ConversionStepProtocol where Output == String {
 
     /// Checks that the input string matches the regexp.
     func regexp(r: NSRegularExpression, anchored: Bool = true) -> ConversionStep<String, String> {
-        func convert(s: String, src: ConversionSource) -> ConversionResult<String, ExtractError> {
+        func convert(s: String, ctx: ConversionContext) -> ConversionResult<String, ExtractError> {
             let opts: NSMatchingOptions
             if anchored { opts = [.Anchored] } else { opts = [] }
             if r.firstMatchInString(s, options: opts, range: NSRange(location: 0, length: s.characters.count)) != nil {
                 return .Success(s)
             }
-            return .Failure(ExtractError.RegexpError(name: src.originalValue.name, value: s, regexp: r.pattern))
+            return .Failure(ExtractError.RegexpError(name: ctx.originalValue.name, value: s, regexp: r.pattern))
         }
         func help() -> [String] {
             return self.help() + ["Must match regular expression \(r.pattern)"]
         }
-        return ConversionStep(input: self.readValue, convert: convert, help: help)
+        return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
 }
