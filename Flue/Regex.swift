@@ -27,8 +27,8 @@ extension ConversionStepProtocol where Output == String {
             }
             return .Failure(ExtractError.RegexpError(name: ctx.originalValue.name, value: s, regexp: r.pattern))
         }
-        func help() -> [String] {
-            return self.help() + ["Must match regular expression \(r.pattern)"]
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + ["Must match regular expression \(r.pattern)"]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }

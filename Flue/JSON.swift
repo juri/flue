@@ -20,6 +20,6 @@ extension ExtractedString {
                 return .Failure(ExtractError.fromError(error))
             }
         }
-        return ConversionStep(input: self.inputForReader, convert: convert, help: { self.help("JSON Data") }, context: self.conversionContext)
+        return ConversionStep(input: self.inputForReader, convert: convert, help: { _ in self.help("JSON Data") }, context: self.conversionContext)
     }
 }

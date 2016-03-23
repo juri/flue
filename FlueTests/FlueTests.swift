@@ -109,15 +109,15 @@ class FlueTests: XCTestCase {
 
     func testHelp() {
         let vp = DictParser(dict: ["q": "12"])
-        XCTAssertEqual(vp.extract("a").asInt().help(), ["Name: a", "Integer"])
-        XCTAssertEqual(vp.extract("a").asInt().range(1...10).help(), ["Name: a", "Integer", "Range: 1..<11"])
-        XCTAssertEqual(vp.extract("a").asBool().help(), ["Name: a", "True if string starts with [YyTt1-9]"])
+        XCTAssertEqual(vp.extract("a").asInt().usage(), ["Name: a", "Integer"])
+        XCTAssertEqual(vp.extract("a").asInt().range(1...10).usage(), ["Name: a", "Integer", "Range: 1..<11"])
+        XCTAssertEqual(vp.extract("a").asBool().usage(), ["Name: a", "True if string starts with [YyTt1-9]"])
         XCTAssertEqual(vp.extract("a").asBool().usage("Usage string"), ["Name: a", "True if string starts with [YyTt1-9]", "Usage string"])
-        XCTAssertEqual(vp.extract("a").asString().help(), ["Name: a", "String"])
+        XCTAssertEqual(vp.extract("a").asString().usage(), ["Name: a", "String"])
 
         let c = vp.extract("q").asInt()
         let cv = try! c.required()
-        XCTAssertEqual(c.help(), ["Name: q", "Integer"])
+        XCTAssertEqual(c.usage(), ["Name: q", "Integer"])
         XCTAssertEqual(cv, 12)
     }
 
@@ -169,7 +169,7 @@ class FlueTests: XCTestCase {
         func convert(v: AnyObject, ctx: ConversionContext) -> [String: Int]? {
             return v as? [String: Int]
         }
-        let help = vp.extract("q").asJSON().asType(convert).help()
+        let help = vp.extract("q").asJSON().asType(convert).usage()
         XCTAssertEqual(help, ["Name: q", "JSON Data", "Type: Dictionary<String, Int>"])
     }
 

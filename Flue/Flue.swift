@@ -238,7 +238,7 @@ public struct ConversionContext {
 public struct ConversionStep<Input, Output>: ConversionStepProtocol {
     public let input: () -> ConversionResult<Input, ExtractError>
     public let convert: (Input, ConversionContext) -> ConversionResult<Output, ExtractError>
-    public let help: () -> [String]
+    public let help: (ConversionContext) -> [String]
     public let context: ConversionContext
 
     /// Returns a `ConversionContext` containing either the value from `input` processed through `convert` or the error it contained.
@@ -283,11 +283,14 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol {
     /// - Parameter s: Extra usage information string.
     /// - Parameter prefix: If `true`, usage string will be the first element of the returned array.
     ///   Otherwise it'll be the last element. Defaults to `false`.
-    public func usage(s: String, prefix: Bool = false) -> [String] {
-        if prefix {
-            return [s] + self.help()
+    public func usage(s: String? = nil, prefix: Bool = false) -> [String] {
+        guard let ss = s else {
+            return self.help(self.context)
         }
-        return self.help() + [s]
+        if prefix {
+            return [ss] + self.help(self.context)
+        }
+        return self.help(self.context) + [ss]
     }
 }
 
@@ -300,7 +303,7 @@ public protocol ConversionStepProtocol {
 
     var input: () -> ConversionResult<Input, ExtractError> { get }
     var convert: (Input, ConversionContext) -> ConversionResult<Output, ExtractError> { get }
-    var help: () -> [String] { get }
+    var help: (ConversionContext) -> [String] { get }
     var context: ConversionContext { get }
     func readValue() -> ConversionResult<Output, ExtractError>
 }
@@ -313,11 +316,11 @@ public extension ConversionStepProtocol {
      - Parameter help: A string to use as the help string for this step. If nil, it will default to a string describing the type returned by `convert`.
      */
     public func asType<NewType>(convert: ((Output, ConversionContext) -> ConversionResult<NewType, ExtractError>), help: String? = nil) -> ConversionStep<Output,NewType> {
-        func helpFunc() -> [String] {
+        func helpFunc(ctx: ConversionContext) -> [String] {
             if let h = help {
-                return self.help() + [h]
+                return self.help(ctx) + [h]
             } else {
-                return self.help() + ["Type: \(NewType.self)"]
+                return self.help(ctx) + ["Type: \(NewType.self)"]
             }
         }
         return ConversionStep(input: self.readValue, convert: convert, help: helpFunc, context: self.context)
@@ -356,8 +359,8 @@ extension ConversionStepProtocol where Output == Int {
             }
             return .Failure(ExtractError.IntRangeError(name: ctx.originalValue.name, value: i, range: r))
         }
-        func help() -> [String] {
-            return self.help() + ["Range: \(r)"]
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + ["Range: \(r)"]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
@@ -377,8 +380,8 @@ extension ConversionStepProtocol where Output == String {
             }
             return .Failure(ExtractError.StringMinLengthError(name: ctx.originalValue.name, value: s, minLength: l))
         }
-        func help() -> [String] {
-            return self.help() + ["Minimum length: \(l)"]
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + ["Minimum length: \(l)"]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
@@ -396,8 +399,8 @@ extension ConversionStepProtocol where Output == String {
             }
             return .Failure(ExtractError.StringMaxLengthError(name: ctx.originalValue.name, value: s, maxLength: l))
         }
-        func help() -> [String] {
-            return self.help() + ["Maximum length: \(l)"]
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + ["Maximum length: \(l)"]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
@@ -419,8 +422,8 @@ extension ConversionStepProtocol where Output == Double {
                 value: ctx.originalValue.value!,
                 shouldBeGreaterThan: ctx.valueParser.floatFormatter.stringFromNumber(limit)!))
         }
-        func help() -> [String] {
-            return self.help() + ["Must be greater than: \(limit)"]
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + ["Must be greater than: \(limit)"]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
@@ -440,8 +443,8 @@ extension ConversionStepProtocol where Output == Double {
                 value: ctx.originalValue.value!,
                 shouldBeLessThan: ctx.valueParser.floatFormatter.stringFromNumber(limit)!))
         }
-        func help() -> [String] {
-            return self.help() + ["Must be less than: \(limit)"]
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + ["Must be less than: \(limit)"]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
@@ -458,8 +461,8 @@ extension ConversionStepProtocol where Output == NSDate {
                 value: ctx.originalValue.value!,
                 limit: ctx.valueParser.dateFormatter.stringFromDate(limit)))
         }
-        func help() -> [String] {
-            return self.help() + ["Must be before \(limit)"]
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + ["Must be before \(limit)"]
         }
 
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
@@ -475,8 +478,8 @@ extension ConversionStepProtocol where Output == NSDate {
                 value: ctx.originalValue.value!,
                 limit: ctx.valueParser.dateFormatter.stringFromDate(limit)))
         }
-        func help() -> [String] {
-            return self.help() + ["Must be after \(limit)"]
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + ["Must be after \(limit)"]
         }
 
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
@@ -518,7 +521,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<String, ExtractError> {
             return .Success(s)
         }
-        func help() -> [String] {
+        func help(ctx: ConversionContext) -> [String] {
             return self.help("String")
         }
         return ConversionStep(input: self.inputForReader, convert: convert, help: help, context: self.conversionContext)
@@ -537,7 +540,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
                 return .Failure(ExtractError.fromError(error))
             }
         }
-        func help() -> [String] {
+        func help(ctx: ConversionContext) -> [String] {
             return self.help("Integer")
         }
 
@@ -557,7 +560,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
                 return .Failure(ExtractError.fromError(error))
             }
         }
-        func help() -> [String] {
+        func help(ctx: ConversionContext) -> [String] {
             return self.help("Integer")
         }
 
@@ -571,7 +574,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
             return .Success(bval)
         }
 
-        func help() -> [String] {
+        func help(ctx: ConversionContext) -> [String] {
             return self.help("True if string starts with [YyTt1-9]")
         }
 
@@ -586,7 +589,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
             return .Failure(ExtractError.DateFormatError(name: ctx.originalValue.name, value: s, format: df.dateFormat))
         }
 
-        func help() -> [String] {
+        func help(ctx: ConversionContext) -> [String] {
             return self.help("Date with format \(df.dateFormat)")
         }
 
