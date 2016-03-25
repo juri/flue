@@ -60,8 +60,8 @@ public class ValueParser {
  DictParser extracts values from a [String: String] dictionary.
  */
 public class DictParser {
-    private let vp: ValueParser
     private let dict: [String: String]
+    public let vp: ValueParser
 
     public init(dict: [String: String], valueParser: ValueParser = ValueParser()) {
         self.dict = dict
@@ -100,7 +100,7 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     /// Flue returns OtherError when an unexpected error occurs.
     case OtherError(String)
 
-    public var description: String {
+    public func descriptionWithValueParser(vp: ValueParser) -> String {
         switch self {
         case .ValueMissing(let name):
             if let n = name {
@@ -116,9 +116,9 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
             }
         case let .IntRangeError(name, value, range):
             if let n = name {
-                return "Key \(n) had value \(value), not in range \(range)"
+                return "Key \(n) had value \(vp.integerFormatter.stringFromNumber(value)!), not in range \(range)"
             } else {
-                return "Value \(value) not in range \(range)"
+                return "Value \(vp.integerFormatter.stringFromNumber(value)!) not in range \(range)"
             }
         case let .ValueTooLargeError(name, value, limit):
             if let n = name {
@@ -134,15 +134,15 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
             }
         case let .StringMinLengthError(name, value, minLength):
             if let n = name {
-                return "Key \(n) had value \(value), shorter than minimum length \(minLength)"
+                return "Key \(n) had value \(value), shorter than minimum length \(vp.integerFormatter.stringFromNumber(minLength)!)"
             } else {
-                return "Value \(value) is shorter than minimum length \(minLength)"
+                return "Value \(value) is shorter than minimum length \(vp.integerFormatter.stringFromNumber(minLength)!)"
             }
         case let .StringMaxLengthError(name, value, maxLength):
             if let n = name {
-                return "Key \(n) had value \(value), longer than minimum length \(maxLength)"
+                return "Key \(n) had value \(value), longer than minimum length \(vp.integerFormatter.stringFromNumber(maxLength)!)"
             } else {
-                return "Value \(value) is longer than minimum length \(maxLength)"
+                return "Value \(value) is longer than minimum length \(vp.integerFormatter.stringFromNumber(maxLength)!)"
             }
         case let .RegexpError(name, value, regexp):
             if let n = name {
@@ -168,6 +168,10 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
         case .OtherError(let msg):
             return msg
         }
+    }
+
+    public var description: String {
+        return self.descriptionWithValueParser(ValueParser())
     }
 
     static func fromError(e: ErrorType) -> ExtractError {
