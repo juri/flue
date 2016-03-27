@@ -41,7 +41,7 @@ class FlueTests: XCTestCase {
         do {
             try vp.extract("asdf").asInt().range(10...20).required()
             XCTFail("Expected an exception")
-        } catch let ExtractError.IntRangeError(name, value, range) {
+        } catch let ExtractError.IntNotInRange(name, value, range) {
             XCTAssertEqual(name, "asdf")
             XCTAssertEqual(value, 1)
             XCTAssertEqual(range, 10...20)
@@ -155,7 +155,7 @@ class FlueTests: XCTestCase {
         do {
             try vp.extract("q").asJSON().asType(convert).required()
             XCTFail("Expected an exception")
-        } catch let ExtractError.FormatError(name, value, expectType) {
+        } catch let ExtractError.BadFormat(name, value, expectType) {
             XCTAssertEqual(name, "q")
             XCTAssertEqual(value, "{\"w\": \"e\"}")
             XCTAssertEqual(expectType, "Dictionary<String, Int>")
@@ -187,7 +187,7 @@ class FlueTests: XCTestCase {
         case .Success(let v):
             XCTFail("Unexpected success \(v)")
         case .Failure(let e):
-            XCTAssertEqual(e, ExtractError.StringMinLengthError(name: "q", value: "wer", minLength: 4))
+            XCTAssertEqual(e, ExtractError.StringTooShort(name: "q", value: "wer", minLength: 4))
         }
 
         switch vp.extract("q").asString().maxLength(4).readValue() {
@@ -201,7 +201,7 @@ class FlueTests: XCTestCase {
         case .Success(let v):
             XCTFail("Unexpected success \(v)")
         case .Failure(let e):
-            XCTAssertEqual(e, ExtractError.StringMaxLengthError(name: "q", value: "wer", maxLength: 2))
+            XCTAssertEqual(e, ExtractError.StringTooLong(name: "q", value: "wer", maxLength: 2))
         }
     }
 
@@ -219,7 +219,7 @@ class FlueTests: XCTestCase {
         case .Success(let v):
             XCTFail("Unexpected value \(v)")
         case .Failure(let e):
-            XCTAssertEqual(e, ExtractError.RegexpError(name: "q", value: "asdf", regexp: "b.*"))
+            XCTAssertEqual(e, ExtractError.NoRegexpMatch(name: "q", value: "asdf", regexp: "b.*"))
         }
     }
 }

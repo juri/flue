@@ -65,24 +65,24 @@ public class DictParser {
 public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     /// Flue returns ValueMissing when the parser received a nil value.
     case ValueMissing(name: String?)
-    /// Flue returns FormatError when conversion to a different type fails.
-    case FormatError(name: String?, value: String, expectType: String)
-    /// Flue returns IntRangeError when `range` fails on an integer value.
-    case IntRangeError(name: String?, value: Int, range: Range<Int>)
-    case ValueTooSmallError(name: String?, value: String, shouldBeGreaterThan: String)
-    case ValueTooLargeError(name: String?, value: String, shouldBeLessThan: String)
-    /// Flue returns StringMinLengthError when `minLength` fails on a string value.
-    case StringMinLengthError(name: String?, value: String, minLength: Int)
-    /// Flue returns StringMaxLengthError when `maxLength` fails on a string value.
-    case StringMaxLengthError(name: String?, value: String, maxLength: Int)
-    /// Flue returns RegexpError when `regexp` fails on a string value.
-    case RegexpError(name: String?, value: String, regexp: String)
-    /// Flue returns DateFormatError when `value` couldn't be parsed as a NSDate with `format`.
-    case DateFormatError(name: String?, value: String, format: String)
-    /// Flue returns DateTooEarlyError when `value` represented a date that was earlier than `limit`.
-    case DateTooEarlyError(name: String?, value: NSString, limit: NSString)
-    /// Flue returns DateTooLateError when `value` represented a date that was later than `limit`.
-    case DateTooLateError(name: String?, value: NSString, limit: NSString)
+    /// Flue returns BadFormat when conversion to a different type fails.
+    case BadFormat(name: String?, value: String, expectType: String)
+    /// Flue returns IntNotInRange when `range` fails on an integer value.
+    case IntNotInRange(name: String?, value: Int, range: Range<Int>)
+    case ValueTooSmall(name: String?, value: String, shouldBeGreaterThan: String)
+    case ValueTooLarge(name: String?, value: String, shouldBeLessThan: String)
+    /// Flue returns StringTooShort when `minLength` fails on a string value.
+    case StringTooShort(name: String?, value: String, minLength: Int)
+    /// Flue returns StringTooLong when `maxLength` fails on a string value.
+    case StringTooLong(name: String?, value: String, maxLength: Int)
+    /// Flue returns NoRegexpMatch when `regexp` fails on a string value.
+    case NoRegexpMatch(name: String?, value: String, regexp: String)
+    /// Flue returns DateBadFormat when `value` couldn't be parsed as a NSDate with `format`.
+    case DateBadFormat(name: String?, value: String, format: String)
+    /// Flue returns DateTooEarly when `value` represented a date that was earlier than `limit`.
+    case DateTooEarly(name: String?, value: NSString, limit: NSString)
+    /// Flue returns DateTooLate when `value` represented a date that was later than `limit`.
+    case DateTooLate(name: String?, value: NSString, limit: NSString)
     /// Flue returns OtherError when an unexpected error occurs.
     case OtherError(String)
 
@@ -96,104 +96,104 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
             }
             return NSLocalizedString("Flue.Error.ValueMissing.Anonymous", bundle: flueBundle(), comment: "Flue: ValueMissing error, no name")
 
-        case .FormatError(let name, let value, let expectType):
+        case .BadFormat(let name, let value, let expectType):
             if let n = name {
                 return String(format: 
-                    NSLocalizedString("Flue.Error.FormatError.Named", bundle: flueBundle(), comment: "Flue: Format error, named. Parameters: name, value, expected type"),
+                    NSLocalizedString("Flue.Error.BadFormat.Named", bundle: flueBundle(), comment: "Flue: Format error, named. Parameters: name, value, expected type"),
                     n, value, expectType)
             }
             return String(format: 
-                NSLocalizedString("Flue.Error.FormatError.Anonymous", bundle: flueBundle(), comment: "Flue: Format error, no name. Parameters: value, expected type"),
+                NSLocalizedString("Flue.Error.BadFormat.Anonymous", bundle: flueBundle(), comment: "Flue: Format error, no name. Parameters: value, expected type"),
                 value, expectType)
 
-        case let .IntRangeError(name, value, range):
+        case let .IntNotInRange(name, value, range):
             if let n = name {
                 return String(format: 
-                    NSLocalizedString("Flue.Error.IntRangeError.Named", bundle: flueBundle(), comment: "Flue: IntRange error, named. Parameters: name, value, range"),
+                    NSLocalizedString("Flue.Error.IntNotInRange.Named", bundle: flueBundle(), comment: "Flue: IntRange error, named. Parameters: name, value, range"),
                     n, vp.integerFormatter.stringFromNumber(value)!, range.description)
             }
             return String(format: 
-                NSLocalizedString("Flue.Error.IntRangeError.Anonymous", bundle: flueBundle(), comment: "Flue: IntRange error, no name. Parameters: value, range"),
+                NSLocalizedString("Flue.Error.IntNotInRange.Anonymous", bundle: flueBundle(), comment: "Flue: IntRange error, no name. Parameters: value, range"),
                 vp.integerFormatter.stringFromNumber(value)!, range.description)
 
-        case let .ValueTooLargeError(name, value, limit):
+        case let .ValueTooLarge(name, value, limit):
             if let n = name {
                 return String(format: 
-                    NSLocalizedString("Flue.Error.ValueTooLargeError.Named", bundle: flueBundle(), comment: "Flue: ValueTooLarge error, named. Parameters: name, value, limit"),
+                    NSLocalizedString("Flue.Error.ValueTooLarge.Named", bundle: flueBundle(), comment: "Flue: ValueTooLarge error, named. Parameters: name, value, limit"),
                     n, value, limit)
             }
             return String(format: 
-                NSLocalizedString("Flue.Error.ValueTooLargeError.Anonoymous", bundle: flueBundle(), comment: "Flue: ValueTooLarge error, no name. Parameters: value, limit"),
+                NSLocalizedString("Flue.Error.ValueTooLarge.Anonoymous", bundle: flueBundle(), comment: "Flue: ValueTooLarge error, no name. Parameters: value, limit"),
                 value, limit)
 
-        case let .ValueTooSmallError(name, value, limit):
+        case let .ValueTooSmall(name, value, limit):
             if let n = name {
                 return String(format: 
-                    NSLocalizedString("Flue.Error.ValueTooSmallError.Named", bundle: flueBundle(), comment: "Flue: ValueTooSmall error, named. Parameters: name, value, limit"),
+                    NSLocalizedString("Flue.Error.ValueTooSmall.Named", bundle: flueBundle(), comment: "Flue: ValueTooSmall error, named. Parameters: name, value, limit"),
                     n, value, limit)
 
             }
             return String(format: 
-                NSLocalizedString("Flue.Error.ValueTooSmallError.Anonymous", bundle: flueBundle(), comment: "Flue: ValueTooSmall error, no name. Parameters: value, limit"),
+                NSLocalizedString("Flue.Error.ValueTooSmall.Anonymous", bundle: flueBundle(), comment: "Flue: ValueTooSmall error, no name. Parameters: value, limit"),
                 value, limit)
 
-        case let .StringMinLengthError(name, value, minLength):
+        case let .StringTooShort(name, value, minLength):
             if let n = name {
                 return String(format: 
-                    NSLocalizedString("Flue.Error.StringMinLengthError.Named", bundle: flueBundle(), comment: "Flue: StringMinLength error, named. Parameters: name, value, min length"),
+                    NSLocalizedString("Flue.Error.StringTooShort.Named", bundle: flueBundle(), comment: "Flue: StringMinLength error, named. Parameters: name, value, min length"),
                     n, value, vp.integerFormatter.stringFromNumber(minLength)!)
             }
             return String(format: 
-                NSLocalizedString("Flue.Error.StringMinLengthError.Anonymous", bundle: flueBundle(), comment: "Flue: StringMinLength error, no name. Parameters: value, min length"),
+                NSLocalizedString("Flue.Error.StringTooShort.Anonymous", bundle: flueBundle(), comment: "Flue: StringMinLength error, no name. Parameters: value, min length"),
                 value, vp.integerFormatter.stringFromNumber(minLength)!)
 
-        case let .StringMaxLengthError(name, value, maxLength):
+        case let .StringTooLong(name, value, maxLength):
             if let n = name {
                 return String(format: 
-                    NSLocalizedString("Flue.Error.StringMaxLengthError.Named", bundle: flueBundle(), comment: "Flue: StringMaxLength error, named. Parameters: name, value, max length"),
+                    NSLocalizedString("Flue.Error.StringTooLong.Named", bundle: flueBundle(), comment: "Flue: StringMaxLength error, named. Parameters: name, value, max length"),
                     n, value, vp.integerFormatter.stringFromNumber(maxLength)!)
             }
             return String(format: 
-                NSLocalizedString("Flue.Error.StringMaxLengthError.Anonymous", bundle: flueBundle(), comment: "Flue: StringMaxLength error, no name. Parameters: value, max length"),
+                NSLocalizedString("Flue.Error.StringTooLong.Anonymous", bundle: flueBundle(), comment: "Flue: StringMaxLength error, no name. Parameters: value, max length"),
                 value, vp.integerFormatter.stringFromNumber(maxLength)!)
 
-        case let .RegexpError(name, value, regexp):
+        case let .NoRegexpMatch(name, value, regexp):
             if let n = name {
                 return String(format: 
-                    NSLocalizedString("Flue.Error.RegexpError.Named", bundle: flueBundle(), comment: "Flue: Regexp error, named: Parameters: name, value, regexp"),
+                    NSLocalizedString("Flue.Error.NoRegexpMatch.Named", bundle: flueBundle(), comment: "Flue: Regexp error, named: Parameters: name, value, regexp"),
                     n, value, regexp)
             }
             return String(format: 
-                NSLocalizedString("Flue.Error.RegexpError.Anonymous", bundle: flueBundle(), comment: "Flue: Regexp error, no name: Parameters: value, regexp"),
+                NSLocalizedString("Flue.Error.NoRegexpMatch.Anonymous", bundle: flueBundle(), comment: "Flue: Regexp error, no name: Parameters: value, regexp"),
                 value, regexp)
 
-        case let .DateFormatError(name, value, format):
+        case let .DateBadFormat(name, value, format):
             if let n = name {
                 return String(format: 
-                    NSLocalizedString("Flue.Error.DateFormatError.Named", bundle: flueBundle(), comment: "Flue: DateFormat error, named. Parameters: name, value, format"),
+                    NSLocalizedString("Flue.Error.DateBadFormat.Named", bundle: flueBundle(), comment: "Flue: DateFormat error, named. Parameters: name, value, format"),
                     n, value, format)
             }
             return String(format: 
-                NSLocalizedString("Flue.Error.DateFormatError.Anonymous", bundle: flueBundle(), comment: "Flue: DateFormat error, no name. Parameters: value, format"),
+                NSLocalizedString("Flue.Error.DateBadFormat.Anonymous", bundle: flueBundle(), comment: "Flue: DateFormat error, no name. Parameters: value, format"),
                 value, format)
 
-        case let .DateTooEarlyError(name, value, limit):
+        case let .DateTooEarly(name, value, limit):
             if let n = name {
                 return String(format: 
-                    NSLocalizedString("Flue.Error.DateTooEarlyError.Named", bundle: flueBundle(), comment: "Flue: DateTooEarly error, named. Parameters: name, value, limit"),
+                    NSLocalizedString("Flue.Error.DateTooEarly.Named", bundle: flueBundle(), comment: "Flue: DateTooEarly error, named. Parameters: name, value, limit"),
                     n, value, limit)
             }
             return String(format: 
-                NSLocalizedString("Flue.Error.DateTooEarlyError.Anonymous", bundle: flueBundle(), comment: "Flue: DateTooEarly error, no name. Parameters: value, limit"),
+                NSLocalizedString("Flue.Error.DateTooEarly.Anonymous", bundle: flueBundle(), comment: "Flue: DateTooEarly error, no name. Parameters: value, limit"),
                 value, limit)
-        case let .DateTooLateError(name, value, limit):
+        case let .DateTooLate(name, value, limit):
             if let n = name {
                 return String(format: 
-                    NSLocalizedString("Flue.Error.DateTooLateError.Named", bundle: flueBundle(), comment: "Flue: DateTooLate error, named. Parameters: name, value, limit"),
+                    NSLocalizedString("Flue.Error.DateTooLate.Named", bundle: flueBundle(), comment: "Flue: DateTooLate error, named. Parameters: name, value, limit"),
                     n, value, limit)
             }
             return String(format: 
-                NSLocalizedString("Flue.Error.DateTooLateError.Anonymous", bundle: flueBundle(), comment: "Flue: DateTooLate error, no name. Parameters: name, value, limit"),
+                NSLocalizedString("Flue.Error.DateTooLate.Anonymous", bundle: flueBundle(), comment: "Flue: DateTooLate error, no name. Parameters: name, value, limit"),
                 value, limit)
 
         case .OtherError(let msg):
@@ -220,17 +220,17 @@ public func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
     switch (ee1, ee2) {
     case let (.ValueMissing(n1), .ValueMissing(n2)):
         return n1 == n2
-    case let (.FormatError(name1, value1, expectType1), .FormatError(name2, value2, expectType2)):
+    case let (.BadFormat(name1, value1, expectType1), .BadFormat(name2, value2, expectType2)):
         return name1 == name2 && value1 == value2 && expectType1 == expectType2
-    case let (.IntRangeError(name1, value1, range1), .IntRangeError(name2, value2, range2)):
+    case let (.IntNotInRange(name1, value1, range1), .IntNotInRange(name2, value2, range2)):
         return name1 == name2 && value1 == value2 && range1 == range2
-    case let (.StringMinLengthError(name1, value1, l1), .StringMinLengthError(name2, value2, l2)):
+    case let (.StringTooShort(name1, value1, l1), .StringTooShort(name2, value2, l2)):
         return name1 == name2 && value1 == value2 && l1 == l2
-    case let (.StringMaxLengthError(name1, value1, l1), .StringMaxLengthError(name2, value2, l2)):
+    case let (.StringTooLong(name1, value1, l1), .StringTooLong(name2, value2, l2)):
         return name1 == name2 && value1 == value2 && l1 == l2
     case let (.OtherError(v1), .OtherError(v2)):
         return v1 == v2
-    case let (.RegexpError(n1, v1, r1), .RegexpError(n2, v2, r2)):
+    case let (.NoRegexpMatch(n1, v1, r1), .NoRegexpMatch(n2, v2, r2)):
         return n1 == n2 && v1 == v2 && r1 == r2
     default:
         return false
@@ -365,7 +365,7 @@ public extension ConversionStepProtocol {
      Creates a step that converts the input value to a new type, as specified by the function in the `convert` parameter.
      This variant takes a function that returns an optional, instead of a `ConversionResult`.
 
-     - Parameter convert: A function returning an optional value of the new type. It will be wrapped in a function that returns an `ExtractError.FormatError` in case of nil and that new function will be used as the `convert` value in a `ConversionStep`.
+     - Parameter convert: A function returning an optional value of the new type. It will be wrapped in a function that returns an `ExtractError.BadFormat` in case of nil and that new function will be used as the `convert` value in a `ConversionStep`.
      - Parameter help: A string to use as the help string for this step. If nil, it will default to a string describing the type returned by `convert`.
      */
     public func asType<NewType>(convert: ((Output, ConversionContext) -> NewType?), help: String? = nil) -> ConversionStep<Output,NewType> {
@@ -373,7 +373,7 @@ public extension ConversionStepProtocol {
             if let cv = convert(v, ctx) {
                 return .Success(cv)
             }
-            return .Failure(ExtractError.FormatError(name: ctx.originalValue.name, value: ctx.originalValue.value ?? "", expectType: "\(NewType.self)"))
+            return .Failure(ExtractError.BadFormat(name: ctx.originalValue.name, value: ctx.originalValue.value ?? "", expectType: "\(NewType.self)"))
         }
         return self.asType(cwrap, help: help)
     }
@@ -382,7 +382,7 @@ public extension ConversionStepProtocol {
 extension ConversionStepProtocol where Output == Int {
     /**
      Creates a `ConversionStep` that checks that the input integer is in the specified range.
-     The `ConversionStep` will return a `ExtractError.IntRangeError` if the range
+     The `ConversionStep` will return a `ExtractError.IntNotInRange` if the range
      does not contain the input value.
      
      - Parameter r: The range the input value should be in.
@@ -392,7 +392,7 @@ extension ConversionStepProtocol where Output == Int {
             if r.contains(i) {
                 return .Success(i)
             }
-            return .Failure(ExtractError.IntRangeError(name: ctx.originalValue.name, value: i, range: r))
+            return .Failure(ExtractError.IntNotInRange(name: ctx.originalValue.name, value: i, range: r))
         }
         func help(ctx: ConversionContext) -> [String] {
             let msg = String(format: NSLocalizedString("Flue.Checks.Int.Range.Help", bundle: flueBundle(), comment: "Flue: Check int range: Help text. Parameters: Range"), r.description)
@@ -405,7 +405,7 @@ extension ConversionStepProtocol where Output == Int {
 extension ConversionStepProtocol where Output == String {
     /**
      Creates a `ConversionStep` that checks that the input string is at least `l` characters long.
-     The `ConversionStep` will return a `ExtractError.StringMinLengthError` if it the string is shorter.
+     The `ConversionStep` will return a `ExtractError.StringTooShort` if it the string is shorter.
 
      - Parameter l: The minimum length for the string.
      */
@@ -414,7 +414,7 @@ extension ConversionStepProtocol where Output == String {
             if s.characters.count >= l {
                 return .Success(s)
             }
-            return .Failure(ExtractError.StringMinLengthError(name: ctx.originalValue.name, value: s, minLength: l))
+            return .Failure(ExtractError.StringTooShort(name: ctx.originalValue.name, value: s, minLength: l))
         }
         func help(ctx: ConversionContext) -> [String] {
             let msg = String(format: 
@@ -426,7 +426,7 @@ extension ConversionStepProtocol where Output == String {
 
     /**
      Creates a `ConversionStep` that checks that the input string is at most `l` characters long.
-     The `ConversionStep` will return a `ExtractError.StringMaxLengthError` if the string is longer.
+     The `ConversionStep` will return a `ExtractError.StringTooLong` if the string is longer.
 
      - Parameter l: The maximum length for the string.
      */
@@ -435,7 +435,7 @@ extension ConversionStepProtocol where Output == String {
             if s.characters.count <= l {
                 return .Success(s)
             }
-            return .Failure(ExtractError.StringMaxLengthError(name: ctx.originalValue.name, value: s, maxLength: l))
+            return .Failure(ExtractError.StringTooLong(name: ctx.originalValue.name, value: s, maxLength: l))
         }
         func help(ctx: ConversionContext) -> [String] {
             let msg = String(format: 
@@ -457,7 +457,7 @@ extension ConversionStepProtocol where Output == Double {
             if d > limit {
                 return .Success(d)
             }
-            return .Failure(ExtractError.ValueTooSmallError(
+            return .Failure(ExtractError.ValueTooSmall(
                 name: ctx.originalValue.name,
                 value: ctx.originalValue.value!,
                 shouldBeGreaterThan: ctx.valueParser.floatFormatter.stringFromNumber(limit)!))
@@ -480,7 +480,7 @@ extension ConversionStepProtocol where Output == Double {
             if d < limit {
                 return .Success(d)
             }
-            return .Failure(ExtractError.ValueTooLargeError(
+            return .Failure(ExtractError.ValueTooLarge(
                 name: ctx.originalValue.name,
                 value: ctx.originalValue.value!,
                 shouldBeLessThan: ctx.valueParser.floatFormatter.stringFromNumber(limit)!))
@@ -500,7 +500,7 @@ extension ConversionStepProtocol where Output == NSDate {
             if d.earlierDate(limit) == d {
                 return .Success(d)
             }
-            return .Failure(ExtractError.DateTooLateError(
+            return .Failure(ExtractError.DateTooLate(
                 name: ctx.originalValue.name,
                 value: ctx.originalValue.value!,
                 limit: ctx.valueParser.dateFormatter.stringFromDate(limit)))
@@ -519,7 +519,7 @@ extension ConversionStepProtocol where Output == NSDate {
             if d.laterDate(limit) == d {
                 return .Success(d)
             }
-            return .Failure(ExtractError.DateTooEarlyError(
+            return .Failure(ExtractError.DateTooEarly(
                 name: ctx.originalValue.name,
                 value: ctx.originalValue.value!,
                 limit: ctx.valueParser.dateFormatter.stringFromDate(limit)))
@@ -580,13 +580,13 @@ public struct ExtractedString: CustomDebugStringConvertible {
     }
 
     /// Creates a `ConversionStep` that parses the input string as an integer, using the locale initially passed in to the `ValueParser` constructor.
-    /// The `ConversionStep` will return a `ExtractError.FormatError` if parsing fails.
+    /// The `ConversionStep` will return a `ExtractError.BadFormat` if parsing fails.
     public func asInt() -> ConversionStep<String, Int> {
         let typeName = NSLocalizedString("Flue.Extract.Type.Integer", bundle: flueBundle(), comment: "Flue: Extract value as Integer: Type description")
 
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<Int, ExtractError> {
             guard let parsed = ctx.valueParser.integerFormatter.numberFromString(s) else {
-                return .Failure(ExtractError.FormatError(name: ctx.originalValue.name, value: s, expectType: typeName))
+                return .Failure(ExtractError.BadFormat(name: ctx.originalValue.name, value: s, expectType: typeName))
             }
             return .Success(parsed as Int)
         }
@@ -598,13 +598,13 @@ public struct ExtractedString: CustomDebugStringConvertible {
     }
 
     /// Creates a `ConversionStep` that parses the input string as a double, using the locale initially passed in to the `ValueParser` constructor.
-    /// The `ConversionStep` will return a `ExtractError.FormatError` if parsing fails.
+    /// The `ConversionStep` will return a `ExtractError.BadFormat` if parsing fails.
     public func asDouble() -> ConversionStep<String, Double> {
         let typeName = NSLocalizedString("Flue.Extract.Type.Double", bundle: flueBundle(), comment: "Flue: Extract value as Double: Type description")
 
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<Double, ExtractError> {
             guard let parsed = ctx.valueParser.floatFormatter.numberFromString(s) else {
-                return .Failure(ExtractError.FormatError(name: ctx.originalValue.name, value: s, expectType: typeName))
+                return .Failure(ExtractError.BadFormat(name: ctx.originalValue.name, value: s, expectType: typeName))
             }
             return .Success(parsed as Double)
         }
@@ -634,7 +634,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
             if let parsed = df.dateFromString(s) {
                 return .Success(parsed)
             }
-            return .Failure(ExtractError.DateFormatError(name: ctx.originalValue.name, value: s, format: df.dateFormat))
+            return .Failure(ExtractError.DateBadFormat(name: ctx.originalValue.name, value: s, format: df.dateFormat))
         }
 
         func help(ctx: ConversionContext) -> [String] {
