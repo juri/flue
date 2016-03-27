@@ -23,7 +23,7 @@ extension ExtractedString {
         return ConversionStep(
             input: self.inputForReader,
             convert: convert,
-            help: { _ in self.help(NSLocalizedString("Flue.Extract.Type.JSON.Help", bundle: flueBundle(), comment: "Flue: Extract value as JSON: Help text")) },
+            help: { _ in self.help(NSLocalizedString("Flue.Extract.Type.JSON", bundle: flueBundle(), comment: "Flue: Extract value as JSON: Help text")) },
             context: self.conversionContext)
     }
 }

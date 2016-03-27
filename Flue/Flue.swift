@@ -36,20 +36,6 @@ public class ValueParser {
         self.dateFormatter = dateFormatter
     }
 
-    private func parseInt(name: String?, value: String) throws -> Int {
-        guard let n = self.integerFormatter.numberFromString(value) as? Int else {
-            throw ExtractError.FormatError(name: name, value: value, expectType: NSLocalizedString("Flue.Format.Integer", bundle: flueBundle(), comment: "Flue: Parse string as an integer"))
-        }
-        return n
-    }
-
-    private func parseDouble(name: String?, value: String) throws -> Double {
-        guard let n = self.floatFormatter.numberFromString(value) as? Double else {
-            throw ExtractError.FormatError(name: name, value: value, expectType: NSLocalizedString("Flue.Format.Double", bundle: flueBundle(), comment: "Flue: Parse string as a double"))
-        }
-        return n
-    }
-
     /// Returns an ExtractedString object that can be used to operate on the value.
     public func extract(value: String?, name: String? = nil) -> ExtractedString {
         return ExtractedString(name: name, inputValue: value, parser: self)
@@ -588,7 +574,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
             return .Success(s)
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(NSLocalizedString("Flue.Extract.Type.String.Help", bundle: flueBundle(), comment: "Flue: Extract value as String: Help text"))
+            return self.help(NSLocalizedString("Flue.Extract.Type.String", bundle: flueBundle(), comment: "Flue: Extract value as String: Help text"))
         }
         return ConversionStep(input: self.inputForReader, convert: convert, help: help, context: self.conversionContext)
     }
@@ -596,18 +582,16 @@ public struct ExtractedString: CustomDebugStringConvertible {
     /// Creates a `ConversionStep` that parses the input string as an integer, using the locale initially passed in to the `ValueParser` constructor.
     /// The `ConversionStep` will return a `ExtractError.FormatError` if parsing fails.
     public func asInt() -> ConversionStep<String, Int> {
+        let typeName = NSLocalizedString("Flue.Extract.Type.Integer", bundle: flueBundle(), comment: "Flue: Extract value as Integer: Type description")
+
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<Int, ExtractError> {
-            do {
-                let parsed = try self.parser.parseInt(ctx.originalValue.name, value: s)
-                return .Success(parsed)
-            } catch let err as ExtractError {
-                return .Failure(err)
-            } catch {
-                return .Failure(ExtractError.fromError(error))
+            guard let parsed = ctx.valueParser.integerFormatter.numberFromString(s) else {
+                return .Failure(ExtractError.FormatError(name: ctx.originalValue.name, value: s, expectType: typeName))
             }
+            return .Success(parsed as Int)
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(NSLocalizedString("Flue.Extract.Type.Integer.Help", bundle: flueBundle(), comment: "Flue: Extract value as Integer: Help text"))
+            return self.help(typeName)
         }
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help, context: self.conversionContext)
@@ -616,18 +600,16 @@ public struct ExtractedString: CustomDebugStringConvertible {
     /// Creates a `ConversionStep` that parses the input string as a double, using the locale initially passed in to the `ValueParser` constructor.
     /// The `ConversionStep` will return a `ExtractError.FormatError` if parsing fails.
     public func asDouble() -> ConversionStep<String, Double> {
+        let typeName = NSLocalizedString("Flue.Extract.Type.Double", bundle: flueBundle(), comment: "Flue: Extract value as Double: Type description")
+
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<Double, ExtractError> {
-            do {
-                let parsed = try self.parser.parseDouble(ctx.originalValue.name, value: s)
-                return .Success(parsed)
-            } catch let err as ExtractError {
-                return .Failure(err)
-            } catch {
-                return .Failure(ExtractError.fromError(error))
+            guard let parsed = ctx.valueParser.floatFormatter.numberFromString(s) else {
+                return .Failure(ExtractError.FormatError(name: ctx.originalValue.name, value: s, expectType: typeName))
             }
+            return .Success(parsed as Double)
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(NSLocalizedString("Flue.Extract.Type.Double.Help", bundle: flueBundle(), comment: "Flue: Extract value as Double: Help text"))
+            return self.help(typeName)
         }
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help, context: self.conversionContext)
@@ -641,7 +623,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
         }
 
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(NSLocalizedString("Flue.Extract.Type.Bool.Help", bundle: flueBundle(), comment: "Flue: Extract value as Boolean: Help text"))
+            return self.help(NSLocalizedString("Flue.Extract.Type.Bool", bundle: flueBundle(), comment: "Flue: Extract value as Boolean: Help text"))
         }
 
         return ConversionStep(input: self.inputForReader, convert: convert, help: help, context: self.conversionContext)
@@ -656,7 +638,7 @@ public struct ExtractedString: CustomDebugStringConvertible {
         }
 
         func help(ctx: ConversionContext) -> [String] {
-            let msg = String(format: NSLocalizedString("Flue.Extract.Type.NSDate.Help", bundle: flueBundle(), comment: "Flue: Extract value as NSDate: Help text. Parameters: Date format"), df.dateFormat)
+            let msg = String(format: NSLocalizedString("Flue.Extract.Type.NSDate", bundle: flueBundle(), comment: "Flue: Extract value as NSDate: Help text. Parameters: Date format"), df.dateFormat)
             return self.help(msg)
         }
 

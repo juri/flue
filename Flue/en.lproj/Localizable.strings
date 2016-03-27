@@ -6,9 +6,6 @@
   Copyright © 2016 Juri Pakaste. All rights reserved.
 */
 
-"Flue.Format.Integer" = "Integer";
-"Flue.Format.Double" = "Double";
-
 "Flue.Error.ValueMissing.Named" = "Required value %@ wasn't found";
 "Flue.Error.ValueMissing.Anonymous" = "Required value wasn't found";
 
@@ -54,9 +51,9 @@
 "Flue.Checks.String.Regexp.Help" = "Must match regular expression %@";
 
 "Flue.Extract.Name" = "Name: %@";
-"Flue.Extract.Type.String.Help" = "String";
-"Flue.Extract.Type.Integer.Help" = "Integer";
-"Flue.Extract.Type.Double.Help" = "Double";
-"Flue.Extract.Type.Bool.Help" = "True if string starts with [YyTt1-9]";
-"Flue.Extract.Type.NSDate.Help" = "Date with format %@";
-"Flue.Extract.Type.JSON.Help" = "JSON Data";
+"Flue.Extract.Type.String" = "String";
+"Flue.Extract.Type.Integer" = "Integer";
+"Flue.Extract.Type.Double" = "Double-precision floating point number";
+"Flue.Extract.Type.Bool" = "Boolean: true if string starts with [YyTt1-9]";
+"Flue.Extract.Type.NSDate" = "Date with format %@";
+"Flue.Extract.Type.JSON" = "JSON Data";
