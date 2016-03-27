@@ -11,6 +11,7 @@
 		CB4467ED1C6A50CF00D49630 /* Flue.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB4467E21C6A50CF00D49630 /* Flue.framework */; };
 		CB4467FD1C6A510200D49630 /* Flue.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467FC1C6A510200D49630 /* Flue.swift */; };
 		CB6CC3F91C8B117C00996638 /* FlueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467F11C6A50CF00D49630 /* FlueTests.swift */; };
+		CB787FD51CA69E40001121F3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = CB787FD71CA69E40001121F3 /* Localizable.strings */; };
 		CBEB4B881C89ECE40002DC71 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEB4B871C89ECE40002DC71 /* JSON.swift */; };
 		CBEB4B8A1C89ED440002DC71 /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEB4B891C89ED440002DC71 /* Regex.swift */; };
 /* End PBXBuildFile section */
@@ -33,6 +34,7 @@
 		CB4467F11C6A50CF00D49630 /* FlueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlueTests.swift; sourceTree = "<group>"; };
 		CB4467F31C6A50CF00D49630 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CB4467FC1C6A510200D49630 /* Flue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Flue.swift; sourceTree = "<group>"; };
+		CB787FD61CA69E40001121F3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CBEB4B871C89ECE40002DC71 /* JSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
 		CBEB4B891C89ED440002DC71 /* Regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regex.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -82,6 +84,7 @@
 				CB4467FC1C6A510200D49630 /* Flue.swift */,
 				CBEB4B871C89ECE40002DC71 /* JSON.swift */,
 				CBEB4B891C89ED440002DC71 /* Regex.swift */,
+				CB787FD71CA69E40001121F3 /* Localizable.strings */,
 			);
 			path = Flue;
 			sourceTree = "<group>";
@@ -186,6 +189,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB787FD51CA69E40001121F3 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +230,17 @@
 			targetProxy = CB4467EE1C6A50CF00D49630 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		CB787FD71CA69E40001121F3 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CB787FD61CA69E40001121F3 /* en */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		CB4467F41C6A50CF00D49630 /* Debug */ = {

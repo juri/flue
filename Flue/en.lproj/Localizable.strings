@@ -1,0 +1,62 @@
+/* 
+  Localizable.strings
+  Flue
+
+  Created by Juri Pakaste on 26/03/16.
+  Copyright © 2016 Juri Pakaste. All rights reserved.
+*/
+
+"Flue.Format.Integer" = "Integer";
+"Flue.Format.Double" = "Double";
+
+"Flue.Error.ValueMissing.Named" = "Required value %@ wasn't found";
+"Flue.Error.ValueMissing.Anonymous" = "Required value wasn't found";
+
+"Flue.Error.FormatError.Named" = "Key %@ format error. Had value %@, not %@";
+"Flue.Error.FormatError.Anonymous" = "Format error. Had value %@, not %@";
+
+"Flue.Error.IntRangeError.Named" = "Key %@ had value %@, not in range %@";
+"Flue.Error.IntRangeError.Anonymous" = "Value %@ not in range %@";
+
+"Flue.Error.ValueTooLargeError.Named" = "Key %@ had value %@, must be smaller than %@";
+"Flue.Error.ValueTooLargeError.Anonoymous" = "Value %@ not smaller than %@";
+
+"Flue.Error.ValueTooSmallError.Named" = "Key %@ had value %@, must be larger than %@";
+"Flue.Error.ValueTooSmallError.Anonymous" = "Value %@ not larger than %@";
+
+"Flue.Error.StringMinLengthError.Named" = "Key %@ had value %@, shorter than minimum length %@";
+"Flue.Error.StringMinLengthError.Anonymous" = "Value %@ is shorter than minimum length %@";
+
+"Flue.Error.StringMaxLengthError.Named" = "Key %@ had value %@, longer than minimum length %@";
+"Flue.Error.StringMaxLengthError.Anonymous" = "Value %@ is longer than minimum length %@";
+
+"Flue.Error.RegexpError.Named" = "Key %@ had value %@ that didn't match regular expression %@";
+"Flue.Error.RegexpError.Anonymous" = "Value %@ didn't match regular expression %@";
+
+"Flue.Error.DateFormatError.Named" = "Key %@ had value %@ that couldn't be parsed as date with format %@";
+"Flue.Error.DateFormatError.Anonymous" = "Value %@ couldn't be parsed as date with format %@";
+
+"Flue.Error.DateTooEarlyError.Named" = "Key %@ had value %@, must be after %@";
+"Flue.Error.DateTooEarlyError.Anonymous" = "Date was %@, must be after %@";
+
+"Flue.Error.DateTooLateError.Named" = "Key %@ had value %@, must be before %@";
+"Flue.Error.DateTooLateError.Anonymous" = "Date was %@, must be before %@";
+
+"Flue.Error.UnknownError" = "Unknown error";
+
+"Flue.Checks.Int.Range.Help" = "Range: %@";
+"Flue.Checks.String.MinLength.Help" = "Minimum length: %@";
+"Flue.Checks.String.MaxLength.Help" = "Maximum length: %@";
+"Flue.Checks.Double.GreaterThan.Help" = "Must be greater than: %@";
+"Flue.Checks.Double.LessThan.Help" = "Must be less than: %@";
+"Flue.Checks.NSDate.Before.Help" = "Must be before %@";
+"Flue.Checks.NSDate.After.Help" = "Must be after %@";
+"Flue.Checks.String.Regexp.Help" = "Must match regular expression %@";
+
+"Flue.Extract.Name" = "Name: %@";
+"Flue.Extract.Type.String.Help" = "String";
+"Flue.Extract.Type.Integer.Help" = "Integer";
+"Flue.Extract.Type.Double.Help" = "Double";
+"Flue.Extract.Type.Bool.Help" = "True if string starts with [YyTt1-9]";
+"Flue.Extract.Type.NSDate.Help" = "Date with format %@";
+"Flue.Extract.Type.JSON.Help" = "JSON Data";
