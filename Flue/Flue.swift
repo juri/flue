@@ -69,7 +69,9 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
     case BadFormat(name: String?, value: String, expectType: String)
     /// Flue returns IntNotInRange when `range` fails on an integer value.
     case IntNotInRange(name: String?, value: Int, range: Range<Int>)
+    /// Flue returns ValueTooSmall when a numeric value is smaller than allowed.
     case ValueTooSmall(name: String?, value: String, shouldBeGreaterThan: String)
+    /// Flue returns ValueTooSmall when a numeric value is larger than allowed.
     case ValueTooLarge(name: String?, value: String, shouldBeLessThan: String)
     /// Flue returns StringTooShort when `minLength` fails on a string value.
     case StringTooShort(name: String?, value: String, minLength: Int)
