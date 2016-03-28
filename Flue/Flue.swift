@@ -389,7 +389,7 @@ extension ConversionStepProtocol where Output == Int {
      
      - Parameter r: The range the input value should be in.
      */
-    func range(r: Range<Int>) -> ConversionStep<Int, Int> {
+    public func range(r: Range<Int>) -> ConversionStep<Int, Int> {
         func convert(i: Int, ctx: ConversionContext) -> ConversionResult<Int, ExtractError> {
             if r.contains(i) {
                 return .Success(i)
@@ -411,7 +411,7 @@ extension ConversionStepProtocol where Output == String {
 
      - Parameter l: The minimum length for the string.
      */
-    func minLength(l: Int) -> ConversionStep<String, String> {
+    public func minLength(l: Int) -> ConversionStep<String, String> {
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<String, ExtractError> {
             if s.characters.count >= l {
                 return .Success(s)
@@ -432,7 +432,7 @@ extension ConversionStepProtocol where Output == String {
 
      - Parameter l: The maximum length for the string.
      */
-    func maxLength(l: Int) -> ConversionStep<String, String> {
+    public func maxLength(l: Int) -> ConversionStep<String, String> {
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<String, ExtractError> {
             if s.characters.count <= l {
                 return .Success(s)
@@ -454,7 +454,7 @@ extension ConversionStepProtocol where Output == Double {
      
      - Parameter limit: The lower non-inclusive bound for the value.
      */
-    func greaterThan(limit: Double) -> ConversionStep<Double, Double> {
+    public func greaterThan(limit: Double) -> ConversionStep<Double, Double> {
         func convert(d: Double, ctx: ConversionContext) -> ConversionResult<Double, ExtractError> {
             if d > limit {
                 return .Success(d)
@@ -477,7 +477,7 @@ extension ConversionStepProtocol where Output == Double {
 
      - Parameter limit: The upper non-inclusive bound for the value.
      */
-    func lessThan(limit: Double) -> ConversionStep<Double, Double> {
+    public func lessThan(limit: Double) -> ConversionStep<Double, Double> {
         func convert(d: Double, ctx: ConversionContext) -> ConversionResult<Double, ExtractError> {
             if d < limit {
                 return .Success(d)
@@ -497,7 +497,7 @@ extension ConversionStepProtocol where Output == Double {
 }
 
 extension ConversionStepProtocol where Output == NSDate {
-    func before(limit: NSDate) -> ConversionStep<NSDate, NSDate> {
+    public func before(limit: NSDate) -> ConversionStep<NSDate, NSDate> {
         func convert(d: NSDate, ctx: ConversionContext) -> ConversionResult<NSDate, ExtractError> {
             if d.earlierDate(limit) == d {
                 return .Success(d)
@@ -516,7 +516,7 @@ extension ConversionStepProtocol where Output == NSDate {
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
 
-    func after(limit: NSDate) -> ConversionStep<NSDate, NSDate> {
+    public func after(limit: NSDate) -> ConversionStep<NSDate, NSDate> {
         func convert(d: NSDate, ctx: ConversionContext) -> ConversionResult<NSDate, ExtractError> {
             if d.laterDate(limit) == d {
                 return .Success(d)

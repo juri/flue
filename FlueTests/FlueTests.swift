@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import Flue
+import Flue
 
 class FlueTests: XCTestCase {
     func testDF() {
