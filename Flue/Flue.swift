@@ -272,7 +272,7 @@ public struct ConversionContext {
  - `convert` converts the value from `input` to the next type.
  - `help` returns the current array of help messages.
  */
-public struct ConversionStep<Input, Output>: ConversionStepProtocol {
+public struct ConversionStep<Input, Output>: ConversionStepProtocol, UsageProvider {
     public let input: () -> ConversionResult<Input, ExtractError>
     public let convert: (Input, ConversionContext) -> ConversionResult<Output, ExtractError>
     public let help: (ConversionContext) -> [String]
@@ -315,20 +315,30 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol {
         }
     }
 
-    /// Returns the collected help array from `help` with an additional usage string.
-    ///
-    /// - Parameter s: Extra usage information string.
-    /// - Parameter prefix: If `true`, usage string will be the first element of the returned array.
-    ///   Otherwise it'll be the last element. Defaults to `false`.
-    public func usage(s: String? = nil, prefix: Bool = false) -> [String] {
-        guard let ss = s else {
-            return self.help(self.context)
+    /// Adds a string to the help array. The addition can be placed at either end
+    /// of the array.
+    public func addHelp(s: String, prefix: Bool = false) -> ConversionStep<Input, Output> {
+        let oldHelp = self.help
+        let newHelp = { (cctx: ConversionContext) -> [String] in
+            if prefix {
+                return [s] + oldHelp(cctx)
+            }
+            return oldHelp(cctx) + [s]
         }
-        if prefix {
-            return [ss] + self.help(self.context)
-        }
-        return self.help(self.context) + [ss]
+        return ConversionStep(input: self.input, convert: self.convert, help: newHelp, context: self.context)
     }
+
+    /// Returns the current help array.
+    public func usage() -> [String] {
+        return self.help(self.context)
+    }
+}
+
+/// UsageProviders provide an `usage` method. It makes it easier to deal with a collection
+/// of `ConversionStep`s when collecting their help messages.
+public protocol UsageProvider {
+    /// Returns the current help array.
+    func usage() -> [String]
 }
 
 /**
@@ -342,6 +352,8 @@ public protocol ConversionStepProtocol {
     var convert: (Input, ConversionContext) -> ConversionResult<Output, ExtractError> { get }
     var help: (ConversionContext) -> [String] { get }
     var context: ConversionContext { get }
+
+    func addHelp(s: String, prefix: Bool) -> Self
     func readValue() -> ConversionResult<Output, ExtractError>
 }
 
