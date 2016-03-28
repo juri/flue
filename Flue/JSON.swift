@@ -10,7 +10,7 @@ import Foundation
 
 extension ExtractedString {
     /// Parses the input string as JSON.
-    func asJSON(allowFragments: Bool = false) -> ConversionStep<String, AnyObject> {
+    public func asJSON(allowFragments: Bool = false) -> ConversionStep<String, AnyObject> {
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<AnyObject, ExtractError> {
             do {
                 let opts: NSJSONReadingOptions = allowFragments ? [.AllowFragments] : []

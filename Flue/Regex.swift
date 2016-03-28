@@ -10,7 +10,7 @@ import Foundation
 
 extension ConversionStepProtocol where Output == String {
     /// Checks that the input string matches the regexp. If the regular expression compilation fails, it retuns a nil step.
-    func regexp(rs: String, opts: NSRegularExpressionOptions = [], anchored: Bool = true) -> ConversionStep<String, String>? {
+    public func regexp(rs: String, opts: NSRegularExpressionOptions = [], anchored: Bool = true) -> ConversionStep<String, String>? {
         guard let r = try? NSRegularExpression(pattern: rs, options: opts) else {
             return nil
         }
@@ -18,7 +18,7 @@ extension ConversionStepProtocol where Output == String {
     }
 
     /// Checks that the input string matches the regexp.
-    func regexp(r: NSRegularExpression, anchored: Bool = true) -> ConversionStep<String, String> {
+    public func regexp(r: NSRegularExpression, anchored: Bool = true) -> ConversionStep<String, String> {
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<String, ExtractError> {
             let opts: NSMatchingOptions
             if anchored { opts = [.Anchored] } else { opts = [] }
