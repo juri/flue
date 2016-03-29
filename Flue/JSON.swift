@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension ExtractedString {
+extension ConversionStepProtocol where Output == String {
     /// Parses the input string as JSON.
     public func asJSON(allowFragments: Bool = false) -> ConversionStep<String, AnyObject> {
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<AnyObject, ExtractError> {
@@ -21,9 +21,9 @@ extension ExtractedString {
             }
         }
         return ConversionStep(
-            input: self.inputForReader,
+            input: self.readValue,
             convert: convert,
-            help: { _ in self.help(NSLocalizedString("Flue.Extract.Type.JSON", bundle: flueBundle(), comment: "Flue: Extract value as JSON: Help text")) },
-            context: self.conversionContext)
+            help: { ctx in self.help(ctx) + [NSLocalizedString("Flue.Extract.Type.JSON", bundle: flueBundle(), comment: "Flue: Extract value as JSON: Help text")] },
+            context: self.context)
     }
 }

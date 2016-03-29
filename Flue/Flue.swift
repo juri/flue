@@ -36,9 +36,33 @@ public class ValueParser {
         self.dateFormatter = dateFormatter
     }
 
-    /// Returns an ExtractedString object that can be used to operate on the value.
-    public func extract(value: String?, name: String? = nil) -> ExtractedString {
-        return ExtractedString(name: name, inputValue: value, parser: self)
+    /// Returns an ConversionStep object with a String result
+    public func extract(value: String?, name: String? = nil) -> ConversionStep<String, String> {
+        func readValue() -> ConversionResult<String, ExtractError> {
+            guard let val = value else {
+                return .Failure(.ValueMissing(name: name))
+            }
+            return .Success(val)
+        }
+
+        func convert(s: String, ctx: ConversionContext) -> ConversionResult<String, ExtractError> {
+            return .Success(s)
+        }
+
+        func help(ctx: ConversionContext) -> [String] {
+            if let n = name {
+                let msg = String(
+                    format: NSLocalizedString("Flue.Extract.Name", bundle: flueBundle(), comment: "Flue: Extract named value: Help text. Parameters: name"),
+                    n)
+                return [msg]
+            }
+            return []
+        }
+
+        let originalValue = OriginalValue(name: name, value: value)
+        let conversionContext = ConversionContext(valueParser: self, originalValue: originalValue)
+
+        return ConversionStep(input: readValue, convert: convert, help: help, context: conversionContext)
     }
 }
 
@@ -54,7 +78,7 @@ public class DictParser {
         self.vp = valueParser
     }
 
-    public func extract(key: String) -> ExtractedString {
+    public func extract(key: String) -> ConversionStep<String,String> {
         return self.vp.extract(self.dict[key], name: key)
     }
 }
@@ -458,6 +482,71 @@ extension ConversionStepProtocol where Output == String {
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
+
+    /// Creates a `ConversionStep` that parses the input string as an integer, using the locale initially passed in to the `ValueParser` constructor.
+    /// The `ConversionStep` will return a `ExtractError.BadFormat` if parsing fails.
+    public func asInt() -> ConversionStep<String, Int> {
+        let typeName = NSLocalizedString("Flue.Extract.Type.Integer", bundle: flueBundle(), comment: "Flue: Extract value as Integer: Type description")
+
+        func convert(s: String, ctx: ConversionContext) -> ConversionResult<Int, ExtractError> {
+            guard let parsed = ctx.valueParser.integerFormatter.numberFromString(s) else {
+                return .Failure(ExtractError.BadFormat(name: ctx.originalValue.name, value: s, expectType: typeName))
+            }
+            return .Success(parsed as Int)
+        }
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + [typeName]
+        }
+        return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
+    }
+
+    /// Creates a `ConversionStep` that parses the input string as a double, using the locale initially passed in to the `ValueParser` constructor.
+    /// The `ConversionStep` will return a `ExtractError.BadFormat` if parsing fails.
+    public func asDouble() -> ConversionStep<String, Double> {
+        let typeName = NSLocalizedString("Flue.Extract.Type.Double", bundle: flueBundle(), comment: "Flue: Extract value as Double: Type description")
+
+        func convert(s: String, ctx: ConversionContext) -> ConversionResult<Double, ExtractError> {
+            guard let parsed = ctx.valueParser.floatFormatter.numberFromString(s) else {
+                return .Failure(ExtractError.BadFormat(name: ctx.originalValue.name, value: s, expectType: typeName))
+            }
+            return .Success(parsed as Double)
+        }
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + [typeName]
+        }
+
+        return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
+    }
+
+    /// Creates a `ConversionStep` that parses the input string as a boolean, using `NSString`'s `boolValue` method.
+    public func asBool() -> ConversionStep<String, Bool> {
+        func convert(s: String, ctx: ConversionContext) -> ConversionResult<Bool, ExtractError> {
+            let bval = (s as NSString).boolValue
+            return .Success(bval)
+        }
+
+        func help(ctx: ConversionContext) -> [String] {
+            return self.help(ctx) + [NSLocalizedString("Flue.Extract.Type.Bool", bundle: flueBundle(), comment: "Flue: Extract value as Boolean: Help text")]
+        }
+
+        return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
+    }
+
+    public func asDate(df: NSDateFormatter) -> ConversionStep<String, NSDate> {
+        func convert(s: String, ctx: ConversionContext) -> ConversionResult<NSDate, ExtractError> {
+            if let parsed = df.dateFromString(s) {
+                return .Success(parsed)
+            }
+            return .Failure(ExtractError.DateBadFormat(name: ctx.originalValue.name, value: s, format: df.dateFormat))
+        }
+
+        func help(ctx: ConversionContext) -> [String] {
+            let msg = String(format: NSLocalizedString("Flue.Extract.Type.NSDate", bundle: flueBundle(), comment: "Flue: Extract value as NSDate: Help text. Parameters: Date format"), df.dateFormat)
+            return self.help(ctx) + [msg]
+        }
+
+        return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
+    }
 }
 
 extension ConversionStepProtocol where Output == Double {
@@ -545,126 +634,6 @@ extension ConversionStepProtocol where Output == NSDate {
         }
 
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
-    }
-}
-
-/**
- ExtractedString is the initially extracted value.
- */
-public struct ExtractedString: CustomDebugStringConvertible {
-    let name: String?
-    let inputValue: String?
-    let parser: ValueParser
-
-    var value: String? {
-        return self.inputValue
-    }
-
-    public var debugDescription: String {
-        return "ExtractedString name:\(self.name) inputValue:\(self.inputValue)"
-    }
-
-    func help(extra: String) -> [String] {
-        if let name = self.name {
-            let msg = String(format:
-                NSLocalizedString("Flue.Extract.Name", bundle: flueBundle(), comment: "Flue: Extract named value: Help text. Parameters: name"),
-                name)
-
-            return [msg, extra]
-        }
-        return [extra]
-    }
-
-    func inputForReader() -> ConversionResult<String, ExtractError> {
-        guard let val = self.inputValue else {
-            return .Failure(.ValueMissing(name: self.name))
-        }
-        return .Success(val)
-    }
-
-    /// Creates a `ConversionStep` that just treats the value as a String.
-    public func asString() -> ConversionStep<String, String> {
-        func convert(s: String, ctx: ConversionContext) -> ConversionResult<String, ExtractError> {
-            return .Success(s)
-        }
-        func help(ctx: ConversionContext) -> [String] {
-            return self.help(NSLocalizedString("Flue.Extract.Type.String", bundle: flueBundle(), comment: "Flue: Extract value as String: Help text"))
-        }
-        return ConversionStep(input: self.inputForReader, convert: convert, help: help, context: self.conversionContext)
-    }
-
-    /// Creates a `ConversionStep` that parses the input string as an integer, using the locale initially passed in to the `ValueParser` constructor.
-    /// The `ConversionStep` will return a `ExtractError.BadFormat` if parsing fails.
-    public func asInt() -> ConversionStep<String, Int> {
-        let typeName = NSLocalizedString("Flue.Extract.Type.Integer", bundle: flueBundle(), comment: "Flue: Extract value as Integer: Type description")
-
-        func convert(s: String, ctx: ConversionContext) -> ConversionResult<Int, ExtractError> {
-            guard let parsed = ctx.valueParser.integerFormatter.numberFromString(s) else {
-                return .Failure(ExtractError.BadFormat(name: ctx.originalValue.name, value: s, expectType: typeName))
-            }
-            return .Success(parsed as Int)
-        }
-        func help(ctx: ConversionContext) -> [String] {
-            return self.help(typeName)
-        }
-
-        return ConversionStep(input: self.inputForReader, convert: convert, help: help, context: self.conversionContext)
-    }
-
-    /// Creates a `ConversionStep` that parses the input string as a double, using the locale initially passed in to the `ValueParser` constructor.
-    /// The `ConversionStep` will return a `ExtractError.BadFormat` if parsing fails.
-    public func asDouble() -> ConversionStep<String, Double> {
-        let typeName = NSLocalizedString("Flue.Extract.Type.Double", bundle: flueBundle(), comment: "Flue: Extract value as Double: Type description")
-
-        func convert(s: String, ctx: ConversionContext) -> ConversionResult<Double, ExtractError> {
-            guard let parsed = ctx.valueParser.floatFormatter.numberFromString(s) else {
-                return .Failure(ExtractError.BadFormat(name: ctx.originalValue.name, value: s, expectType: typeName))
-            }
-            return .Success(parsed as Double)
-        }
-        func help(ctx: ConversionContext) -> [String] {
-            return self.help(typeName)
-        }
-
-        return ConversionStep(input: self.inputForReader, convert: convert, help: help, context: self.conversionContext)
-    }
-
-    /// Creates a `ConversionStep` that parses the input string as a boolean, using `NSString`'s `boolValue` method.
-    public func asBool() -> ConversionStep<String, Bool> {
-        func convert(s: String, ctx: ConversionContext) -> ConversionResult<Bool, ExtractError> {
-            let bval = (s as NSString).boolValue
-            return .Success(bval)
-        }
-
-        func help(ctx: ConversionContext) -> [String] {
-            return self.help(NSLocalizedString("Flue.Extract.Type.Bool", bundle: flueBundle(), comment: "Flue: Extract value as Boolean: Help text"))
-        }
-
-        return ConversionStep(input: self.inputForReader, convert: convert, help: help, context: self.conversionContext)
-    }
-
-    public func asDate(df: NSDateFormatter) -> ConversionStep<String, NSDate> {
-        func convert(s: String, ctx: ConversionContext) -> ConversionResult<NSDate, ExtractError> {
-            if let parsed = df.dateFromString(s) {
-                return .Success(parsed)
-            }
-            return .Failure(ExtractError.DateBadFormat(name: ctx.originalValue.name, value: s, format: df.dateFormat))
-        }
-
-        func help(ctx: ConversionContext) -> [String] {
-            let msg = String(format: NSLocalizedString("Flue.Extract.Type.NSDate", bundle: flueBundle(), comment: "Flue: Extract value as NSDate: Help text. Parameters: Date format"), df.dateFormat)
-            return self.help(msg)
-        }
-
-        return ConversionStep(input: self.inputForReader, convert: convert, help: help, context: self.conversionContext)
-    }
-
-    internal var originalValue: OriginalValue {
-        return OriginalValue(name: self.name, value: self.inputValue)
-    }
-
-    internal var conversionContext: ConversionContext {
-        return ConversionContext(valueParser: self.parser, originalValue: self.originalValue)
     }
 }
 

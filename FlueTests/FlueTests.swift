@@ -112,8 +112,8 @@ class FlueTests: XCTestCase {
         XCTAssertEqual(vp.extract("a").asInt().usage(), ["Name: a", "Integer"])
         XCTAssertEqual(vp.extract("a").asInt().range(1...10).usage(), ["Name: a", "Integer", "Range: 1..<11"])
         XCTAssertEqual(vp.extract("a").asBool().usage(), ["Name: a", "Boolean: true if string starts with [YyTt1-9]"])
-        XCTAssertEqual(vp.extract("a").asBool().usage("Usage string"), ["Name: a", "Boolean: true if string starts with [YyTt1-9]", "Usage string"])
-        XCTAssertEqual(vp.extract("a").asString().usage(), ["Name: a", "String"])
+        XCTAssertEqual(vp.extract("a").asBool().addHelp("Usage string").usage(), ["Name: a", "Boolean: true if string starts with [YyTt1-9]", "Usage string"])
+        XCTAssertEqual(vp.extract("a").usage(), ["Name: a"])
 
         let c = vp.extract("q").asInt()
         let cv = try! c.required()
@@ -123,7 +123,7 @@ class FlueTests: XCTestCase {
 
     func testString() {
         let vp = DictParser(dict: ["q": "w"])
-        XCTAssertEqual(try! vp.extract("q").asString().required(), "w")
+        XCTAssertEqual(try! vp.extract("q").required(), "w")
     }
 
     func testJSONWithFullConvert() {
@@ -176,28 +176,28 @@ class FlueTests: XCTestCase {
     func testStringLength() {
         let vp = DictParser(dict: ["q": "wer"])
 
-        switch vp.extract("q").asString().minLength(1).readValue() {
+        switch vp.extract("q").minLength(1).readValue() {
         case .Success(let v):
             XCTAssertEqual(v, "wer")
         case .Failure(let e):
             XCTFail("Unexpected error \(e)")
         }
 
-        switch vp.extract("q").asString().minLength(4).readValue() {
+        switch vp.extract("q").minLength(4).readValue() {
         case .Success(let v):
             XCTFail("Unexpected success \(v)")
         case .Failure(let e):
             XCTAssertEqual(e, ExtractError.StringTooShort(name: "q", value: "wer", minLength: 4))
         }
 
-        switch vp.extract("q").asString().maxLength(4).readValue() {
+        switch vp.extract("q").maxLength(4).readValue() {
         case .Success(let v):
             XCTAssertEqual(v, "wer")
         case .Failure(let e):
             XCTFail("Unexpected error \(e)")
         }
 
-        switch vp.extract("q").asString().maxLength(2).readValue() {
+        switch vp.extract("q").maxLength(2).readValue() {
         case .Success(let v):
             XCTFail("Unexpected success \(v)")
         case .Failure(let e):
@@ -208,18 +208,69 @@ class FlueTests: XCTestCase {
     func testRegexp() {
         let dp = DictParser(dict: ["q": "asdf"])
 
-        switch dp.extract("q").asString().regexp("a.*")!.readValue() {
+        switch dp.extract("q").regexp("a.*")!.readValue() {
         case .Success(let v):
             XCTAssertEqual(v, "asdf")
         case .Failure(let e):
             XCTFail("Unexpected error \(e)")
         }
 
-        switch dp.extract("q").asString().regexp("b.*")!.readValue() {
+        switch dp.extract("q").regexp("b.*")!.readValue() {
         case .Success(let v):
             XCTFail("Unexpected value \(v)")
         case .Failure(let e):
             XCTAssertEqual(e, ExtractError.NoRegexpMatch(name: "q", value: "asdf", regexp: "b.*"))
         }
     }
+
+
+
+    func testReadSettings() {
+        struct Settings {
+            var debug: Bool
+            var port: Int
+            var config: AnyObject
+            var key: String
+        }
+
+        enum SettingsOrError {
+            case Success(Settings)
+            case Error(String)
+        }
+
+        func readSettings(env: [String: String]) -> (SettingsOrError, String) {
+            let vp = Flue.ValueParser()
+            let dp = Flue.DictParser(dict: env, valueParser: vp)
+
+            let debugExtract = dp.extract("DEBUG").asBool()
+            let portExtract = dp.extract("PORT").asInt()
+            let configExtract = dp.extract("CONFIG").asJSON()
+            let keyExtract = dp.extract("KEY").minLength(6).addHelp("Encryption key.", prefix: false)
+
+            let usageProviders: [UsageProvider] = [debugExtract, portExtract, configExtract, keyExtract]
+
+//            let help = usageProviders.flatMap { $0.usage(nil, prefix: false) }.joinWithSeparator("\n")
+            let help = usageProviders.map { $0.usage() }.map { $0.joinWithSeparator(". ") }.joinWithSeparator("\n")
+            do {
+                return (.Success(Settings(
+                    debug: try debugExtract.required(),
+                    port: try portExtract.required(),
+                    config: try configExtract.required(),
+                    key: try keyExtract.required()
+                    )), help)
+            } catch let err as ExtractError {
+                return (.Error(err.descriptionWithValueParser(vp)), help)
+            } catch {
+                return (.Error("asdf"), help)
+            }
+        }
+
+        let env1 = ["DEBUG": "yes", "PORT": "42158", "CONFIG": "{\"asdf\": \"bar\"}", "KEY": "qwer"]
+        let (res1, help) = readSettings(env1)
+        print("help: \(help)")
+
+
+    }
 }
+
+
