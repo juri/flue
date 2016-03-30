@@ -109,15 +109,15 @@ class FlueTests: XCTestCase {
 
     func testHelp() {
         let vp = DictParser(dict: ["q": "12"])
-        XCTAssertEqual(vp.extract("a").asInt().usage(), ["Name: a", "Integer"])
-        XCTAssertEqual(vp.extract("a").asInt().range(1...10).usage(), ["Name: a", "Integer", "Range: 1..<11"])
-        XCTAssertEqual(vp.extract("a").asBool().usage(), ["Name: a", "Boolean: true if string starts with [YyTt1-9]"])
-        XCTAssertEqual(vp.extract("a").asBool().addHelp("Usage string").usage(), ["Name: a", "Boolean: true if string starts with [YyTt1-9]", "Usage string"])
-        XCTAssertEqual(vp.extract("a").usage(), ["Name: a"])
+        XCTAssertEqual(vp.extract("a").asInt().usage(), ["a", "Integer"])
+        XCTAssertEqual(vp.extract("a").asInt().range(1...10).usage(), ["a", "Integer", "Range: 1..<11"])
+        XCTAssertEqual(vp.extract("a").asBool().usage(), ["a", "Boolean: true if string starts with [YyTt1-9]"])
+        XCTAssertEqual(vp.extract("a").asBool().addHelp("Usage string").usage(), ["a", "Boolean: true if string starts with [YyTt1-9]", "Usage string"])
+        XCTAssertEqual(vp.extract("a").usage(), ["a"])
 
         let c = vp.extract("q").asInt()
         let cv = try! c.required()
-        XCTAssertEqual(c.usage(), ["Name: q", "Integer"])
+        XCTAssertEqual(c.usage(), ["q", "Integer"])
         XCTAssertEqual(cv, 12)
     }
 
@@ -170,7 +170,7 @@ class FlueTests: XCTestCase {
             return v as? [String: Int]
         }
         let help = vp.extract("q").asJSON().asType(convert).usage()
-        XCTAssertEqual(help, ["Name: q", "JSON Data", "Type: Dictionary<String, Int>"])
+        XCTAssertEqual(help, ["q", "JSON Data", "Type: Dictionary<String, Int>"])
     }
 
     func testStringLength() {

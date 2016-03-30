@@ -51,10 +51,7 @@ public class ValueParser {
 
         func help(ctx: ConversionContext) -> [String] {
             if let n = name {
-                let msg = String(
-                    format: NSLocalizedString("Flue.Extract.Name", bundle: flueBundle(), comment: "Flue: Extract named value: Help text. Parameters: name"),
-                    n)
-                return [msg]
+                return [n]
             }
             return []
         }

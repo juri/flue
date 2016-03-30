@@ -50,7 +50,6 @@
 "Flue.Checks.NSDate.After.Help" = "Must be after %@";
 "Flue.Checks.String.Regexp.Help" = "Must match regular expression %@";
 
-"Flue.Extract.Name" = "Name: %@";
 "Flue.Extract.Type.String" = "String";
 "Flue.Extract.Type.Integer" = "Integer";
 "Flue.Extract.Type.Double" = "Double-precision floating point number";
