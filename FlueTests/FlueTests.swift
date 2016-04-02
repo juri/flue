@@ -32,7 +32,7 @@ class FlueTests: XCTestCase {
         do {
             try vp.extract("zap").asInt().required()
             XCTFail("Expected an exception")
-        } catch let ExtractError.ValueMissing(name) {
+        } catch let ExtractError.ValueMissing(name, _) {
             XCTAssertEqual(name, "zap")
         } catch {
             XCTFail("Unexpected exception \(error)")
@@ -41,7 +41,7 @@ class FlueTests: XCTestCase {
         do {
             try vp.extract("asdf").asInt().range(10...20).required()
             XCTFail("Expected an exception")
-        } catch let ExtractError.IntNotInRange(name, value, range) {
+        } catch let ExtractError.IntNotInRange(name, value, range, _) {
             XCTAssertEqual(name, "asdf")
             XCTAssertEqual(value, 1)
             XCTAssertEqual(range, 10...20)
@@ -155,7 +155,7 @@ class FlueTests: XCTestCase {
         do {
             try vp.extract("q").asJSON().asType(convert).required()
             XCTFail("Expected an exception")
-        } catch let ExtractError.BadFormat(name, value, expectType) {
+        } catch let ExtractError.BadFormat(name, value, expectType, _) {
             XCTAssertEqual(name, "q")
             XCTAssertEqual(value, "{\"w\": \"e\"}")
             XCTAssertEqual(expectType, "Dictionary<String, Int>")
@@ -187,7 +187,7 @@ class FlueTests: XCTestCase {
         case .Success(let v):
             XCTFail("Unexpected success \(v)")
         case .Failure(let e):
-            XCTAssertEqual(e, ExtractError.StringTooShort(name: "q", value: "wer", minLength: 4))
+            XCTAssertEqual(e, ExtractError.StringTooShort(name: "q", value: "wer", minLength: 4, localizedDescription: ""))
         }
 
         switch vp.extract("q").maxLength(4).readValue() {
@@ -201,7 +201,7 @@ class FlueTests: XCTestCase {
         case .Success(let v):
             XCTFail("Unexpected success \(v)")
         case .Failure(let e):
-            XCTAssertEqual(e, ExtractError.StringTooLong(name: "q", value: "wer", maxLength: 2))
+            XCTAssertEqual(e, ExtractError.StringTooLong(name: "q", value: "wer", maxLength: 2, localizedDescription: ""))
         }
     }
 
@@ -219,7 +219,7 @@ class FlueTests: XCTestCase {
         case .Success(let v):
             XCTFail("Unexpected value \(v)")
         case .Failure(let e):
-            XCTAssertEqual(e, ExtractError.NoRegexpMatch(name: "q", value: "asdf", regexp: "b.*"))
+            XCTAssertEqual(e, ExtractError.NoRegexpMatch(name: "q", value: "asdf", regexp: "b.*", localizedDescription: ""))
         }
     }
 
@@ -238,6 +238,10 @@ class FlueTests: XCTestCase {
             case Error(String)
         }
 
+        func formatHelp(parts: [String]) -> String {
+            return "\(parts[0]) -- \(parts[1..<parts.count].joinWithSeparator(". "))"
+        }
+
         func readSettings(env: [String: String]) -> (SettingsOrError, String) {
             let vp = Flue.ValueParser()
             let dp = Flue.DictParser(dict: env, valueParser: vp)
@@ -250,7 +254,8 @@ class FlueTests: XCTestCase {
             let usageProviders: [UsageProvider] = [debugExtract, portExtract, configExtract, keyExtract]
 
 //            let help = usageProviders.flatMap { $0.usage(nil, prefix: false) }.joinWithSeparator("\n")
-            let help = usageProviders.map { $0.usage() }.map { $0.joinWithSeparator(". ") }.joinWithSeparator("\n")
+//            let help = usageProviders.map { $0.usage() }.map { $0.joinWithSeparator(". ") }.joinWithSeparator("\n")
+            let help = usageProviders.map { $0.usage() }.map(formatHelp).joinWithSeparator("\n")
             do {
                 return (.Success(Settings(
                     debug: try debugExtract.required(),
@@ -259,7 +264,7 @@ class FlueTests: XCTestCase {
                     key: try keyExtract.required()
                     )), help)
             } catch let err as ExtractError {
-                return (.Error(err.descriptionWithValueParser(vp)), help)
+                return (.Error(err.description), help)
             } catch {
                 return (.Error("asdf"), help)
             }
