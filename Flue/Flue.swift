@@ -299,10 +299,10 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
         case let .IntNotInRange(_, _, _, localizedDescription):
             return localizedDescription
 
-        case let .ValueTooLarge(_, _, _, localizedDescription):
+        case let .ValueTooSmall(_, _, _, localizedDescription):
             return localizedDescription
 
-        case let .ValueTooSmall(_, _, _, localizedDescription):
+        case let .ValueTooLarge(_, _, _, localizedDescription):
             return localizedDescription
 
         case let .StringTooShort(_, _, _, localizedDescription):
@@ -347,14 +347,24 @@ public func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
         return name1 == name2 && value1 == value2 && expectType1 == expectType2
     case let (.IntNotInRange(name1, value1, range1, _), .IntNotInRange(name2, value2, range2, _)):
         return name1 == name2 && value1 == value2 && range1 == range2
+    case let (.ValueTooSmall(n1, v1, l1, _), .ValueTooSmall(n2, v2, l2, _)):
+        return n1 == n2 && v1 == v2 && l1 == l2
+    case let (.ValueTooLarge(n1, v1, l1, _), .ValueTooLarge(n2, v2, l2, _)):
+        return n1 == n2 && v1 == v2 && l1 == l2
     case let (.StringTooShort(name1, value1, l1, _), .StringTooShort(name2, value2, l2, _)):
         return name1 == name2 && value1 == value2 && l1 == l2
     case let (.StringTooLong(name1, value1, l1, _), .StringTooLong(name2, value2, l2, _)):
         return name1 == name2 && value1 == value2 && l1 == l2
-    case let (.OtherError(v1), .OtherError(v2)):
-        return v1 == v2
     case let (.NoRegexpMatch(n1, v1, r1, _), .NoRegexpMatch(n2, v2, r2, _)):
         return n1 == n2 && v1 == v2 && r1 == r2
+    case let (.DateBadFormat(n1, v1, f1, _), .DateBadFormat(n2, v2, f2, _)):
+        return n1 == n2 && v1 == v2 && f1 == f2
+    case let (.DateTooEarly(n1, v1, l1, _), .DateTooEarly(n2, v2, l2, _)):
+        return n1 == n2 && v1 == v2 && l1 == l2
+    case let (.DateTooLate(n1, v1, l1, _), .DateTooLate(n2, v2, l2, _)):
+        return n1 == n2 && v1 == v2 && l1 == l2
+    case let (.OtherError(v1), .OtherError(v2)):
+        return v1 == v2
     default:
         return false
     }
