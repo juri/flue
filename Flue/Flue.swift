@@ -15,9 +15,10 @@ public class ValueParser {
     private let integerFormatter: NSNumberFormatter
     private let floatFormatter: NSNumberFormatter
     private let dateFormatter: NSDateFormatter
+    private let stringLoader: StringLoader
 
     /// Construct ValueParser for the given locale. Defaults to en_US_POSIX.
-    public init(locale: NSLocale = NSLocale(localeIdentifier: "en_US_POSIX")) {
+    public init(locale: NSLocale = NSLocale(localeIdentifier: "en_US_POSIX"), stringLoader: StringLoader = stringBundleLoader()) {
         let integerFormatter = NSNumberFormatter()
         integerFormatter.locale = locale
         integerFormatter.maximumFractionDigits = 0
@@ -34,11 +35,13 @@ public class ValueParser {
         dateFormatter.timeStyle = .ShortStyle
         dateFormatter.dateStyle = .ShortStyle
         self.dateFormatter = dateFormatter
+
+        self.stringLoader = stringLoader
     }
 
     /// Returns an ConversionStep object with a String result
     public func extract(value: String?, name: String? = nil) -> ConversionStep<String, String> {
-        let errorBuilder = ErrorBuilder(integerFormatter: self.integerFormatter, floatFormatter: self.floatFormatter, dateFormatter: self.dateFormatter)
+        let errorBuilder = ErrorBuilder(integerFormatter: self.integerFormatter, floatFormatter: self.floatFormatter, dateFormatter: self.dateFormatter, stringLoader: self.stringLoader)
 
         func readValue() -> ConversionResult<String, ExtractError> {
             guard let val = value else {
@@ -59,15 +62,17 @@ public class ValueParser {
         }
 
         let originalValue = OriginalValue(name: name, value: value)
-        let conversionContext = ConversionContext(valueParser: self, errorBuilder: errorBuilder, originalValue: originalValue)
+        let conversionContext = ConversionContext(valueParser: self, errorBuilder: errorBuilder, stringLoader: self.stringLoader, originalValue: originalValue)
 
         return ConversionStep(input: readValue, convert: convert, help: help, context: conversionContext)
     }
-
-
-
 }
 
+public typealias StringLoader = ((String, String) -> String)
+
+public func stringBundleLoader(bundle: NSBundle = flueBundle()) -> StringLoader {
+    return { NSLocalizedString($0, bundle: bundle, comment: $1) }
+}
 
 /**
  DictParser extracts values from a [String: String] dictionary.
@@ -90,15 +95,16 @@ internal struct ErrorBuilder {
     private let integerFormatter: NSNumberFormatter
     private let floatFormatter: NSNumberFormatter
     private let dateFormatter: NSDateFormatter
+    private let stringLoader: StringLoader
 
     internal func valueMissing(name: String?) -> ExtractError {
         let desc: String
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.ValueMissing.Named", bundle: flueBundle(), comment: "Flue: ValueMissing error, named. Parameters: name"),
+                format: self.stringLoader("Flue.Error.ValueMissing.Named", "Flue: ValueMissing error, named. Parameters: name"),
                 n)
         } else {
-            desc = NSLocalizedString("Flue.Error.ValueMissing.Anonymous", bundle: flueBundle(), comment: "Flue: ValueMissing error, no name")
+            desc = self.stringLoader("Flue.Error.ValueMissing.Anonymous", "Flue: ValueMissing error, no name")
         }
         return ExtractError.ValueMissing(name: name, localizedDescription: desc)
     }
@@ -107,11 +113,11 @@ internal struct ErrorBuilder {
         let desc: String
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.BadFormat.Named", bundle: flueBundle(), comment: "Flue: Format error, named. Parameters: name, value, expected type"),
+                format: self.stringLoader("Flue.Error.BadFormat.Named", "Flue: Format error, named. Parameters: name, value, expected type"),
                 n, value, expectType)
         } else {
             desc = String(
-                format: NSLocalizedString("Flue.Error.BadFormat.Anonymous", bundle: flueBundle(), comment: "Flue: Format error, no name. Parameters: value, expected type"),
+                format: self.stringLoader("Flue.Error.BadFormat.Anonymous", "Flue: Format error, no name. Parameters: value, expected type"),
                 value, expectType)
         }
         return ExtractError.BadFormat(name: name, value: value, expectType: expectType, localizedDescription: desc)
@@ -122,11 +128,11 @@ internal struct ErrorBuilder {
 
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.IntNotInRange.Named", bundle: flueBundle(), comment: "Flue: IntRange error, named. Parameters: name, value, range"),
+                format: self.stringLoader("Flue.Error.IntNotInRange.Named", "Flue: IntRange error, named. Parameters: name, value, range"),
                 n, self.integerFormatter.stringFromNumber(value)!, range.description)
         } else {
             desc = String(
-                format: NSLocalizedString("Flue.Error.IntNotInRange.Anonymous", bundle: flueBundle(), comment: "Flue: IntRange error, no name. Parameters: value, range"),
+                format: self.stringLoader("Flue.Error.IntNotInRange.Anonymous", "Flue: IntRange error, no name. Parameters: value, range"),
                 self.integerFormatter.stringFromNumber(value)!, range.description)
         }
         return ExtractError.IntNotInRange(name: name, value: value, range: range, localizedDescription: desc)
@@ -137,11 +143,11 @@ internal struct ErrorBuilder {
 
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.ValueTooSmall.Named", bundle: flueBundle(), comment: "Flue: ValueTooSmall error, named. Parameters: name, value, limit"),
+                format: self.stringLoader("Flue.Error.ValueTooSmall.Named", "Flue: ValueTooSmall error, named. Parameters: name, value, limit"),
                 n, value, shouldBeGreaterThan)
         } else {
             desc = String(
-                format: NSLocalizedString("Flue.Error.ValueTooSmall.Anonymous", bundle: flueBundle(), comment: "Flue: ValueTooSmall error, no name. Parameters: value, limit"),
+                format: self.stringLoader("Flue.Error.ValueTooSmall.Anonymous", "Flue: ValueTooSmall error, no name. Parameters: value, limit"),
                 value, shouldBeGreaterThan)
         }
 
@@ -153,11 +159,11 @@ internal struct ErrorBuilder {
 
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.ValueTooLarge.Named", bundle: flueBundle(), comment: "Flue: ValueTooLarge error, named. Parameters: name, value, limit"),
+                format: self.stringLoader("Flue.Error.ValueTooLarge.Named", "Flue: ValueTooLarge error, named. Parameters: name, value, limit"),
                 n, value, shouldBeLessThan)
         } else {
             desc = String(
-                format: NSLocalizedString("Flue.Error.ValueTooLarge.Anonoymous", bundle: flueBundle(), comment: "Flue: ValueTooLarge error, no name. Parameters: value, limit"),
+                format: self.stringLoader("Flue.Error.ValueTooLarge.Anonoymous", "Flue: ValueTooLarge error, no name. Parameters: value, limit"),
                 value, shouldBeLessThan)
         }
 
@@ -169,11 +175,11 @@ internal struct ErrorBuilder {
 
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.StringTooShort.Named", bundle: flueBundle(), comment: "Flue: StringMinLength error, named. Parameters: name, value, min length"),
+                format: self.stringLoader("Flue.Error.StringTooShort.Named", "Flue: StringMinLength error, named. Parameters: name, value, min length"),
                 n, value, self.integerFormatter.stringFromNumber(minLength)!)
         } else {
             desc = String(
-                format: NSLocalizedString("Flue.Error.StringTooShort.Anonymous", bundle: flueBundle(), comment: "Flue: StringMinLength error, no name. Parameters: value, min length"),
+                format: self.stringLoader("Flue.Error.StringTooShort.Anonymous", "Flue: StringMinLength error, no name. Parameters: value, min length"),
                 value, self.integerFormatter.stringFromNumber(minLength)!)
         }
 
@@ -184,11 +190,11 @@ internal struct ErrorBuilder {
         let desc: String
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.StringTooLong.Named", bundle: flueBundle(), comment: "Flue: StringMaxLength error, named. Parameters: name, value, max length"),
+                format: self.stringLoader("Flue.Error.StringTooLong.Named", "Flue: StringMaxLength error, named. Parameters: name, value, max length"),
                 n, value, self.integerFormatter.stringFromNumber(maxLength)!)
         } else {
             desc = String(
-                format: NSLocalizedString("Flue.Error.StringTooLong.Anonymous", bundle: flueBundle(), comment: "Flue: StringMaxLength error, no name. Parameters: value, max length"),
+                format: self.stringLoader("Flue.Error.StringTooLong.Anonymous", "Flue: StringMaxLength error, no name. Parameters: value, max length"),
                 value, self.integerFormatter.stringFromNumber(maxLength)!)
         }
 
@@ -199,11 +205,11 @@ internal struct ErrorBuilder {
         let desc: String
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.NoRegexpMatch.Named", bundle: flueBundle(), comment: "Flue: Regexp error, named: Parameters: name, value, regexp"),
+                format: self.stringLoader("Flue.Error.NoRegexpMatch.Named", "Flue: Regexp error, named: Parameters: name, value, regexp"),
                 n, value, regexp)
         } else {
             desc = String(
-                format: NSLocalizedString("Flue.Error.NoRegexpMatch.Anonymous", bundle: flueBundle(), comment: "Flue: Regexp error, no name: Parameters: value, regexp"),
+                format: self.stringLoader("Flue.Error.NoRegexpMatch.Anonymous", "Flue: Regexp error, no name: Parameters: value, regexp"),
                 value, regexp)
         }
 
@@ -214,12 +220,12 @@ internal struct ErrorBuilder {
         let desc: String
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.DateBadFormat.Named", bundle: flueBundle(), comment: "Flue: DateFormat error, named. Parameters: name, value, format"),
+                format: self.stringLoader("Flue.Error.DateBadFormat.Named", "Flue: DateFormat error, named. Parameters: name, value, format"),
                 n, value, format)
 
         } else {
             desc = String(
-                format: NSLocalizedString("Flue.Error.DateBadFormat.Anonymous", bundle: flueBundle(), comment: "Flue: DateFormat error, no name. Parameters: value, format"),
+                format: self.stringLoader("Flue.Error.DateBadFormat.Anonymous", "Flue: DateFormat error, no name. Parameters: value, format"),
                 value, format)
         }
 
@@ -230,11 +236,11 @@ internal struct ErrorBuilder {
         let desc: String
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.DateTooEarly.Named", bundle: flueBundle(), comment: "Flue: DateTooEarly error, named. Parameters: name, value, limit"),
+                format: self.stringLoader("Flue.Error.DateTooEarly.Named", "Flue: DateTooEarly error, named. Parameters: name, value, limit"),
                 n, self.dateFormatter.stringFromDate(value), self.dateFormatter.stringFromDate(limit))
         } else {
             desc = String(
-                format: NSLocalizedString("Flue.Error.DateTooEarly.Anonymous", bundle: flueBundle(), comment: "Flue: DateTooEarly error, no name. Parameters: value, limit"),
+                format: self.stringLoader("Flue.Error.DateTooEarly.Anonymous", "Flue: DateTooEarly error, no name. Parameters: value, limit"),
                 self.dateFormatter.stringFromDate(value), self.dateFormatter.stringFromDate(limit))
         }
 
@@ -245,17 +251,26 @@ internal struct ErrorBuilder {
         let desc: String
         if let n = name {
             desc = String(
-                format: NSLocalizedString("Flue.Error.DateTooLate.Named", bundle: flueBundle(), comment: "Flue: DateTooLate error, named. Parameters: name, value, limit"),
+                format: self.stringLoader("Flue.Error.DateTooLate.Named", "Flue: DateTooLate error, named. Parameters: name, value, limit"),
                 n, self.dateFormatter.stringFromDate(value), self.dateFormatter.stringFromDate(limit))
         } else {
             desc = String(
-                format: NSLocalizedString("Flue.Error.DateTooLate.Anonymous", bundle: flueBundle(), comment: "Flue: DateTooLate error, no name. Parameters: name, value, limit"),
+                format: self.stringLoader("Flue.Error.DateTooLate.Anonymous", "Flue: DateTooLate error, no name. Parameters: name, value, limit"),
                 self.dateFormatter.stringFromDate(value), self.dateFormatter.stringFromDate(limit))
         }
 
         return ExtractError.DateTooLate(name: name, value: value, limit: limit, localizedDescription: desc)
     }
 
+    internal func fromError(e: ErrorType) -> ExtractError {
+        let errorDesc: String
+        if let ep = e as? CustomStringConvertible {
+            errorDesc = ep.description
+        } else {
+            errorDesc = self.stringLoader("Flue.Error.UnknownError", "Flue: Wrapping an unexpected error that's not CustomStringConvertible")
+        }
+        return .OtherError(errorDesc)
+    }
 }
 
 
@@ -327,16 +342,6 @@ public enum ExtractError: ErrorType, CustomStringConvertible, Equatable {
             return msg
         }
     }
-
-    static func fromError(e: ErrorType) -> ExtractError {
-        let errorDesc: String
-        if let ep = e as? CustomStringConvertible {
-            errorDesc = ep.description
-        } else {
-            errorDesc = NSLocalizedString("Flue.Error.UnknownError", bundle: flueBundle(), comment: "Flue: Wrapping an unexpected error that's not CustomStringConvertible")
-        }
-        return .OtherError(errorDesc)
-    }
 }
 
 public func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
@@ -392,6 +397,7 @@ public struct OriginalValue {
 public struct ConversionContext {
     internal let valueParser: ValueParser
     internal let errorBuilder: ErrorBuilder
+    let stringLoader: StringLoader
     let originalValue: OriginalValue
 }
 
@@ -541,7 +547,7 @@ extension ConversionStepProtocol where Output == Int {
             return .Failure(ctx.errorBuilder.intNotInRange(ctx.originalValue.name, value: i, range: r))
         }
         func help(ctx: ConversionContext) -> [String] {
-            let msg = String(format: NSLocalizedString("Flue.Checks.Int.Range.Help", bundle: flueBundle(), comment: "Flue: Check int range: Help text. Parameters: Range"), r.description)
+            let msg = String(format: ctx.stringLoader("Flue.Checks.Int.Range.Help", "Flue: Check int range: Help text. Parameters: Range"), r.description)
             return self.help(ctx) + [msg]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
@@ -564,7 +570,7 @@ extension ConversionStepProtocol where Output == String {
         }
         func help(ctx: ConversionContext) -> [String] {
             let msg = String(format: 
-                NSLocalizedString("Flue.Checks.String.MinLength.Help", bundle: flueBundle(), comment: "Flue: Check string minimum length: Help text. Parameters: minimum length"), ctx.valueParser.integerFormatter.stringFromNumber(l)!)
+                ctx.stringLoader("Flue.Checks.String.MinLength.Help", "Flue: Check string minimum length: Help text. Parameters: minimum length"), ctx.valueParser.integerFormatter.stringFromNumber(l)!)
             return self.help(ctx) + [msg]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
@@ -585,7 +591,7 @@ extension ConversionStepProtocol where Output == String {
         }
         func help(ctx: ConversionContext) -> [String] {
             let msg = String(format: 
-                NSLocalizedString("Flue.Checks.String.MaxLength.Help", bundle: flueBundle(), comment: "Flue: Check string maximum length: Help text. Parameters: maximum length"), ctx.valueParser.integerFormatter.stringFromNumber(l)!)
+                ctx.stringLoader("Flue.Checks.String.MaxLength.Help", "Flue: Check string maximum length: Help text. Parameters: maximum length"), ctx.valueParser.integerFormatter.stringFromNumber(l)!)
             return self.help(ctx) + [msg]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
@@ -594,16 +600,18 @@ extension ConversionStepProtocol where Output == String {
     /// Creates a `ConversionStep` that parses the input string as an integer, using the locale initially passed in to the `ValueParser` constructor.
     /// The `ConversionStep` will return a `ExtractError.BadFormat` if parsing fails.
     public func asInt() -> ConversionStep<String, Int> {
-        let typeName = NSLocalizedString("Flue.Extract.Type.Integer", bundle: flueBundle(), comment: "Flue: Extract value as Integer: Type description")
+        func typeName(stringLoader: StringLoader) -> String {
+             return stringLoader("Flue.Extract.Type.Integer", "Flue: Extract value as Integer: Type description")
+        }
 
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<Int, ExtractError> {
             guard let parsed = ctx.valueParser.integerFormatter.numberFromString(s) else {
-                return .Failure(ctx.errorBuilder.badFormat(ctx.originalValue.name, value: s, expectType: typeName))
+                return .Failure(ctx.errorBuilder.badFormat(ctx.originalValue.name, value: s, expectType: typeName(ctx.stringLoader)))
             }
             return .Success(parsed as Int)
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(ctx) + [typeName]
+            return self.help(ctx) + [typeName(ctx.stringLoader)]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
     }
@@ -611,16 +619,18 @@ extension ConversionStepProtocol where Output == String {
     /// Creates a `ConversionStep` that parses the input string as a double, using the locale initially passed in to the `ValueParser` constructor.
     /// The `ConversionStep` will return a `ExtractError.BadFormat` if parsing fails.
     public func asDouble() -> ConversionStep<String, Double> {
-        let typeName = NSLocalizedString("Flue.Extract.Type.Double", bundle: flueBundle(), comment: "Flue: Extract value as Double: Type description")
+        func typeName(stringLoader: StringLoader) -> String {
+            return stringLoader("Flue.Extract.Type.Double", "Flue: Extract value as Double: Type description")
+        }
 
         func convert(s: String, ctx: ConversionContext) -> ConversionResult<Double, ExtractError> {
             guard let parsed = ctx.valueParser.floatFormatter.numberFromString(s) else {
-                return .Failure(ctx.errorBuilder.badFormat(ctx.originalValue.name, value: s, expectType: typeName))
+                return .Failure(ctx.errorBuilder.badFormat(ctx.originalValue.name, value: s, expectType: typeName(ctx.stringLoader)))
             }
             return .Success(parsed as Double)
         }
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(ctx) + [typeName]
+            return self.help(ctx) + [typeName(ctx.stringLoader)]
         }
 
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
@@ -634,7 +644,7 @@ extension ConversionStepProtocol where Output == String {
         }
 
         func help(ctx: ConversionContext) -> [String] {
-            return self.help(ctx) + [NSLocalizedString("Flue.Extract.Type.Bool", bundle: flueBundle(), comment: "Flue: Extract value as Boolean: Help text")]
+            return self.help(ctx) + [ctx.stringLoader("Flue.Extract.Type.Bool", "Flue: Extract value as Boolean: Help text")]
         }
 
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
@@ -649,7 +659,7 @@ extension ConversionStepProtocol where Output == String {
         }
 
         func help(ctx: ConversionContext) -> [String] {
-            let msg = String(format: NSLocalizedString("Flue.Extract.Type.NSDate", bundle: flueBundle(), comment: "Flue: Extract value as NSDate: Help text. Parameters: Date format"), df.dateFormat)
+            let msg = String(format: ctx.stringLoader("Flue.Extract.Type.NSDate", "Flue: Extract value as NSDate: Help text. Parameters: Date format"), df.dateFormat)
             return self.help(ctx) + [msg]
         }
 
@@ -676,7 +686,7 @@ extension ConversionStepProtocol where Output == Double {
         }
         func help(ctx: ConversionContext) -> [String] {
             let msg = String(format: 
-                NSLocalizedString("Flue.Checks.Double.GreaterThan.Help", bundle: flueBundle(), comment: "Flue: Check double is greater than value: Help text. Parameters: limit"), ctx.valueParser.floatFormatter.stringFromNumber(limit)!)
+                ctx.stringLoader("Flue.Checks.Double.GreaterThan.Help", "Flue: Check double is greater than value: Help text. Parameters: limit"), ctx.valueParser.floatFormatter.stringFromNumber(limit)!)
             return self.help(ctx) + [msg]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
@@ -700,7 +710,7 @@ extension ConversionStepProtocol where Output == Double {
         }
         func help(ctx: ConversionContext) -> [String] {
             let msg = String(format: 
-                NSLocalizedString("Flue.Checks.Double.LessThan.Help", bundle: flueBundle(), comment: "Flue: Check double is less than value: Help text. Parameters: limit"), ctx.valueParser.floatFormatter.stringFromNumber(limit)!)
+                ctx.stringLoader("Flue.Checks.Double.LessThan.Help", "Flue: Check double is less than value: Help text. Parameters: limit"), ctx.valueParser.floatFormatter.stringFromNumber(limit)!)
             return self.help(ctx) + [msg]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)
@@ -721,7 +731,7 @@ extension ConversionStepProtocol where Output == NSDate {
         }
         func help(ctx: ConversionContext) -> [String] {
             let msg = String(format: 
-                NSLocalizedString("Flue.Checks.NSDate.Before.Help", bundle: flueBundle(), comment: "Flue: Check NSDate is before another date: Help text. Parameters: limit"), ctx.valueParser.dateFormatter.stringFromDate(limit))
+                ctx.stringLoader("Flue.Checks.NSDate.Before.Help", "Flue: Check NSDate is before another date: Help text. Parameters: limit"), ctx.valueParser.dateFormatter.stringFromDate(limit))
             return self.help(ctx) + [msg]
         }
 
@@ -741,7 +751,7 @@ extension ConversionStepProtocol where Output == NSDate {
         }
         func help(ctx: ConversionContext) -> [String] {
             let msg = String(format: 
-                NSLocalizedString("Flue.Checks.NSDate.After.Help", bundle: flueBundle(), comment: "Flue: Check NSDate is after another date: Help text. Parameters: limit"), ctx.valueParser.dateFormatter.stringFromDate(limit))
+                ctx.stringLoader("Flue.Checks.NSDate.After.Help", "Flue: Check NSDate is after another date: Help text. Parameters: limit"), ctx.valueParser.dateFormatter.stringFromDate(limit))
             return self.help(ctx) + [msg]
         }
 

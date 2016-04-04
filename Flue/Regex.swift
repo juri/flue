@@ -28,7 +28,7 @@ extension ConversionStepProtocol where Output == String {
             return .Failure(ctx.errorBuilder.noRegexpMatch(ctx.originalValue.name, value: s, regexp: r.pattern))
         }
         func help(ctx: ConversionContext) -> [String] {
-            let msg = String.localizedStringWithFormat(NSLocalizedString("Flue.Checks.String.Regexp.Help", bundle: flueBundle(), comment: "Flue: Check regexp match: Help text. Parameters: Regexp pattern"), r.pattern)
+            let msg = String.localizedStringWithFormat(ctx.stringLoader("Flue.Checks.String.Regexp.Help", "Flue: Check regexp match: Help text. Parameters: Regexp pattern"), r.pattern)
             return self.help(ctx) + [msg]
         }
         return ConversionStep(input: self.readValue, convert: convert, help: help, context: self.context)

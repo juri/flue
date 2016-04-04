@@ -17,13 +17,13 @@ extension ConversionStepProtocol where Output == String {
                 let ob = try NSJSONSerialization.JSONObjectWithData(s.dataUsingEncoding(NSUTF8StringEncoding)!, options: opts)
                 return .Success(ob)
             } catch {
-                return .Failure(ExtractError.fromError(error))
+                return .Failure(ctx.errorBuilder.fromError(error))
             }
         }
         return ConversionStep(
             input: self.readValue,
             convert: convert,
-            help: { ctx in self.help(ctx) + [NSLocalizedString("Flue.Extract.Type.JSON", bundle: flueBundle(), comment: "Flue: Extract value as JSON: Help text")] },
+            help: { ctx in self.help(ctx) + [ctx.stringLoader("Flue.Extract.Type.JSON", "Flue: Extract value as JSON: Help text")] },
             context: self.context)
     }
 }
