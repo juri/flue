@@ -67,6 +67,19 @@ func readExample() {
 }
 ```
 
+You'll get parsed values in the Settings object and a help string that looks like this:
+
+
+```
+DEBUG  -- Boolean: true if string starts with [YyTt1-9]
+PORT   -- Integer
+CONFIG -- JSON Data
+KEY    -- Minimum length: 6. Encryption key.
+PATH   -- String with components separated by :
+```
+
+
+
 ## License
 
 Flue is released under the MIT license. See LICENSE for details.
