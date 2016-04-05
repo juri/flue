@@ -9,35 +9,35 @@
 "Flue.Error.ValueMissing.Named" = "Required value %@ wasn't found";
 "Flue.Error.ValueMissing.Anonymous" = "Required value wasn't found";
 
-"Flue.Error.FormatError.Named" = "Key %@ format error. Had value %@, not %@";
-"Flue.Error.FormatError.Anonymous" = "Format error. Had value %@, not %@";
+"Flue.Error.BadFormat.Named" = "Key %@ format error. Had value %@, not %@";
+"Flue.Error.BadFormat.Anonymous" = "Format error. Had value %@, not %@";
 
-"Flue.Error.IntRangeError.Named" = "Key %@ had value %@, not in range %@";
-"Flue.Error.IntRangeError.Anonymous" = "Value %@ not in range %@";
+"Flue.Error.IntNotInRange.Named" = "Key %@ had value %@, not in range %@";
+"Flue.Error.IntNotInRange.Anonymous" = "Value %@ not in range %@";
 
-"Flue.Error.ValueTooLargeError.Named" = "Key %@ had value %@, must be smaller than %@";
-"Flue.Error.ValueTooLargeError.Anonoymous" = "Value %@ not smaller than %@";
+"Flue.Error.ValueTooLarge.Named" = "Key %@ had value %@, must be smaller than %@";
+"Flue.Error.ValueTooLarge.Anonoymous" = "Value %@ not smaller than %@";
 
-"Flue.Error.ValueTooSmallError.Named" = "Key %@ had value %@, must be larger than %@";
-"Flue.Error.ValueTooSmallError.Anonymous" = "Value %@ not larger than %@";
+"Flue.Error.ValueTooSmall.Named" = "Key %@ had value %@, must be larger than %@";
+"Flue.Error.ValueTooSmall.Anonymous" = "Value %@ not larger than %@";
 
-"Flue.Error.StringMinLengthError.Named" = "Key %@ had value %@, shorter than minimum length %@";
-"Flue.Error.StringMinLengthError.Anonymous" = "Value %@ is shorter than minimum length %@";
+"Flue.Error.StringTooShort.Named" = "Key %@ had value %@, shorter than minimum length %@";
+"Flue.Error.StringTooShort.Anonymous" = "Value %@ is shorter than minimum length %@";
 
-"Flue.Error.StringMaxLengthError.Named" = "Key %@ had value %@, longer than minimum length %@";
-"Flue.Error.StringMaxLengthError.Anonymous" = "Value %@ is longer than minimum length %@";
+"Flue.Error.StringTooLong.Named" = "Key %@ had value %@, longer than minimum length %@";
+"Flue.Error.StringTooLong.Anonymous" = "Value %@ is longer than minimum length %@";
 
-"Flue.Error.RegexpError.Named" = "Key %@ had value %@ that didn't match regular expression %@";
-"Flue.Error.RegexpError.Anonymous" = "Value %@ didn't match regular expression %@";
+"Flue.Error.NoRegexpMatch.Named" = "Key %@ had value %@ that didn't match regular expression %@";
+"Flue.Error.NoRegexpMatch.Anonymous" = "Value %@ didn't match regular expression %@";
 
-"Flue.Error.DateFormatError.Named" = "Key %@ had value %@ that couldn't be parsed as date with format %@";
-"Flue.Error.DateFormatError.Anonymous" = "Value %@ couldn't be parsed as date with format %@";
+"Flue.Error.DateBadFormat.Named" = "Key %@ had value %@ that couldn't be parsed as date with format %@";
+"Flue.Error.DateBadFormat.Anonymous" = "Value %@ couldn't be parsed as date with format %@";
 
-"Flue.Error.DateTooEarlyError.Named" = "Key %@ had value %@, must be after %@";
-"Flue.Error.DateTooEarlyError.Anonymous" = "Date was %@, must be after %@";
+"Flue.Error.DateTooEarly.Named" = "Key %@ had value %@, must be after %@";
+"Flue.Error.DateTooEarly.Anonymous" = "Date was %@, must be after %@";
 
-"Flue.Error.DateTooLateError.Named" = "Key %@ had value %@, must be before %@";
-"Flue.Error.DateTooLateError.Anonymous" = "Date was %@, must be before %@";
+"Flue.Error.DateTooLate.Named" = "Key %@ had value %@, must be before %@";
+"Flue.Error.DateTooLate.Anonymous" = "Date was %@, must be before %@";
 
 "Flue.Error.UnknownError" = "Unknown error";
 
