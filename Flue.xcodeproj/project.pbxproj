@@ -10,8 +10,6 @@
 		CB4467E61C6A50CF00D49630 /* Flue.h in Headers */ = {isa = PBXBuildFile; fileRef = CB4467E51C6A50CF00D49630 /* Flue.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CB4467ED1C6A50CF00D49630 /* Flue.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB4467E21C6A50CF00D49630 /* Flue.framework */; };
 		CB4467FD1C6A510200D49630 /* Flue.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467FC1C6A510200D49630 /* Flue.swift */; };
-		CB584AE81CB4168F0003536B /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = CB584AE71CB4168F0003536B /* README.md */; };
-		CB584AEA1CB417530003536B /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = CB584AE91CB417530003536B /* LICENSE */; };
 		CB6CC3F91C8B117C00996638 /* FlueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4467F11C6A50CF00D49630 /* FlueTests.swift */; };
 		CB787FD51CA69E40001121F3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = CB787FD71CA69E40001121F3 /* Localizable.strings */; };
 		CBEB4B881C89ECE40002DC71 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBEB4B871C89ECE40002DC71 /* JSON.swift */; };
@@ -195,7 +193,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB584AEA1CB417530003536B /* LICENSE in Resources */,
 				CB787FD51CA69E40001121F3 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -216,7 +213,6 @@
 			files = (
 				CB4467FD1C6A510200D49630 /* Flue.swift in Sources */,
 				CBEB4B881C89ECE40002DC71 /* JSON.swift in Sources */,
-				CB584AE81CB4168F0003536B /* README.md in Sources */,
 				CBEB4B8A1C89ED440002DC71 /* Regex.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
