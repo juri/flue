@@ -453,15 +453,18 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol, UsageProvid
         }
     }
 
-    /// Adds a string to the help array. The addition can be placed at either end
-    /// of the array.
+    /// Adds a string to the help array. The addition can be placed either before or after 
+    /// the previous entry.
     public func addHelp(s: String, prefix: Bool = false) -> ConversionStep<Input, Output> {
         let oldHelp = self.help
         let newHelp = { (cctx: ConversionContext) -> [String] in
+            var helps = oldHelp(cctx)
             if prefix {
-                return [s] + oldHelp(cctx)
+                if let last = helps.popLast() {
+                    return helps + [s, last]
+                }
             }
-            return oldHelp(cctx) + [s]
+            return helps + [s]
         }
         return ConversionStep(input: self.input, convert: self.convert, help: newHelp, context: self.context)
     }

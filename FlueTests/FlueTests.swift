@@ -113,7 +113,8 @@ class FlueTests: XCTestCase {
         XCTAssertEqual(vp.extract("a").asInt().range(1...10).usage(), ["a", "Integer", "Range: 1..<11"])
         XCTAssertEqual(vp.extract("a").asBool().usage(), ["a", "Boolean: true if string starts with [YyTt1-9]"])
         XCTAssertEqual(vp.extract("a").asBool().addHelp("Usage string").usage(), ["a", "Boolean: true if string starts with [YyTt1-9]", "Usage string"])
-        XCTAssertEqual(vp.extract("a").usage(), ["a"])
+        XCTAssertEqual(vp.extract("a").addHelp("Foo", prefix: true).usage(), ["Foo", "a"])
+        XCTAssertEqual(vp.extract("a").addHelp("Bar").addHelp("Foo", prefix: true).usage(), ["a", "Foo", "Bar"])
 
         let c = vp.extract("q").asInt()
         let cv = try! c.required()
