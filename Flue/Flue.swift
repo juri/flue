@@ -528,7 +528,7 @@ public extension ConversionStepProtocol {
             if let cv = convert(v, ctx) {
                 return .Success(cv)
             }
-            return .Failure(ctx.errorBuilder.badFormat(ctx.originalValue.name, value: ctx.originalValue.value ?? "", expectType: "\(NewType.self)"))
+            return .Failure(ctx.errorBuilder.badFormat(ctx.originalValue.name, value: ctx.originalValue.value ?? "", expectType: String(NewType.self)))
         }
         return self.asType(cwrap, help: help)
     }
