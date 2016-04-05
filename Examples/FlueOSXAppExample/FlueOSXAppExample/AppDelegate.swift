@@ -56,10 +56,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 key: try keyExtract.required(),
                 path: try pathExtract.required()
                 )), help)
-        } catch let err as ExtractError {
-            return (.Error(err.description), help)
         } catch {
-            return (.Error("asdf"), help)
+            return (.Error(String(error)), help)
         }
     }
 
