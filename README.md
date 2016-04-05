@@ -1,5 +1,7 @@
 # Flue
 
+[![Build Status](https://travis-ci.org/juri/flue.svg?branch=master)](https://travis-ci.org/juri/flue)
+
 Flue is a Swift library. It extracts, converts and validates values from user input. It produces help strings describing those operations.
 
 Flue supports both unnamed values and named values source like the environment.
