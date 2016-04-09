@@ -10,7 +10,7 @@ import Foundation
 
 func readLocalizations() -> [String: String] {
     var size: UInt = 0
-    let localizationSection = getsectdata("__TEXT", "__local_base", &size)
+    let localizationSection = getsectdata("__LOCALIZATIONS", "__base", &size)
     assert(size > 0)
     let data = NSData(bytes: UnsafeMutablePointer<Void>(localizationSection), length: Int(size))
     let localizationsString = NSString(data: data, encoding: NSUTF8StringEncoding)!

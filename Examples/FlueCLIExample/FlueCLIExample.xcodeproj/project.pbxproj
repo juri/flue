@@ -247,7 +247,7 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				OTHER_LDFLAGS = "-Wl,-sectcreate,__TEXT,__local_base,../../Flue/en.lproj/Localizable.strings";
+				OTHER_LDFLAGS = "-Wl,-sectcreate,__LOCALIZATIONS,__base,../../Flue/en.lproj/Localizable.strings,-segprot,__LOCALIZATIONS,r,r";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -258,7 +258,7 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				OTHER_LDFLAGS = "-Wl,-sectcreate,__TEXT,__local_base,../../Flue/en.lproj/Localizable.strings";
+				OTHER_LDFLAGS = "-Wl,-sectcreate,__LOCALIZATIONS,__base,../../Flue/en.lproj/Localizable.strings,-segprot,__LOCALIZATIONS,r,r";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
