@@ -80,12 +80,17 @@ PATH   -- String with components separated by :
 
 ## Localization
 
-Flue contains user-visible messages. They are loaded with the standard Foundation localization APIs, but the system can be overridden by specifying a custom `StringLoader` to the `ValueParser` instance.
+Flue contains user-visible messages. By default they are loaded with the standard Foundation localization APIs from the bundle containing the `ValueParser` class, but the system can be overridden by specifying a custom `StringLoader` to the `ValueParser` instance.
 
 If you wish to use Foundation `NSBundle`-based string loading mechanism, as Flue does by default, but want to load the strings from another bundle, you can use the `stringBundleLoader` helper function to construct a loader that uses `NSLocalizedString` with your desired bundle.
 
-If you don't want to use `NSBundle`, like when you're building a standalone CLI executable, you can construct an arbitrary `StringLoader` function. One approach is to embed the localizations in the binary with the linker; see `Examples/FlueCLIExample` for a sample.
+If you don't want to use `NSBundle`, like when you're building a standalone CLI executable, you can construct an arbitrary `StringLoader` function. One approach is to embed the localizations in the binary with the linker; see `Examples/FlueCLIExample` for a sample. See "Other Linker Flags" in the project and the loading code in `main.swift`. Basically you'll need to specify extra linker flags, like:
 
+```
+-Wl,-sectcreate,__LOCALIZATIONS,__base,../../Flue/en.lproj/Localizable.strings,-segprot,__LOCALIZATIONS,r,r
+```
+
+And then you can load them with `getsectdata` and construct a dictionary with `propertyListFromStringsFileFormat`.
 
 ## License
 
