@@ -78,6 +78,13 @@ KEY    -- Minimum length: 6. Encryption key.
 PATH   -- String with components separated by :
 ```
 
+## Localization
+
+Flue contains user-visible messages. They are loaded with the standard Foundation localization APIs, but the system can be overridden by specifying a custom `StringLoader` to the `ValueParser` instance.
+
+If you wish to use Foundation `NSBundle`-based string loading mechanism, as Flue does by default, but want to load the strings from another bundle, you can use the `stringBundleLoader` helper function to construct a loader that uses `NSLocalizedString` with your desired bundle.
+
+If you don't want to use `NSBundle`, like when you're building a standalone CLI executable, you can construct an arbitrary `StringLoader` function. One approach is to embed the localizations in the binary with the linker; see `Examples/FlueCLIExample` for a sample.
 
 
 ## License
