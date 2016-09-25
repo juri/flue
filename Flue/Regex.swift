@@ -10,7 +10,7 @@ import Foundation
 
 extension ConversionStepProtocol where Output == String {
     /// Checks that the input string matches the regexp. If the regular expression compilation fails, it retuns a nil step.
-    public func regexp(rs: String, opts: NSRegularExpressionOptions = [], anchored: Bool = true) -> ConversionStep<String, String>? {
+    public func regexp(_ rs: String, opts: NSRegularExpression.Options = [], anchored: Bool = true) -> ConversionStep<String, String>? {
         guard let r = try? NSRegularExpression(pattern: rs, options: opts) else {
             return nil
         }
@@ -18,16 +18,16 @@ extension ConversionStepProtocol where Output == String {
     }
 
     /// Checks that the input string matches the regexp.
-    public func regexp(r: NSRegularExpression, anchored: Bool = true) -> ConversionStep<String, String> {
-        func convert(s: String, ctx: ConversionContext) -> ConversionResult<String, ExtractError> {
-            let opts: NSMatchingOptions
-            if anchored { opts = [.Anchored] } else { opts = [] }
-            if r.firstMatchInString(s, options: opts, range: NSRange(location: 0, length: s.characters.count)) != nil {
-                return .Success(s)
+    public func regexp(_ r: NSRegularExpression, anchored: Bool = true) -> ConversionStep<String, String> {
+        func convert(_ s: String, ctx: ConversionContext) -> ConversionResult<String> {
+            let opts: NSRegularExpression.MatchingOptions
+            if anchored { opts = [.anchored] } else { opts = [] }
+            if r.firstMatch(in: s, options: opts, range: NSRange(location: 0, length: s.characters.count)) != nil {
+                return .success(s)
             }
-            return .Failure(ctx.errorBuilder.noRegexpMatch(ctx.originalValue.name, value: s, regexp: r.pattern))
+            return .failure(ctx.errorBuilder.noRegexpMatch(ctx.originalValue.name, value: s, regexp: r.pattern))
         }
-        func help(ctx: ConversionContext) -> [String] {
+        func help(_ ctx: ConversionContext) -> [String] {
             let msg = String.localizedStringWithFormat(ctx.stringLoader("Flue.Checks.String.Regexp.Help", "Flue: Check regexp match: Help text. Parameters: Regexp pattern"), r.pattern)
             return self.help(ctx) + [msg]
         }

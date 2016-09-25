@@ -10,14 +10,14 @@ import Foundation
 
 extension ConversionStepProtocol where Output == String {
     /// Parses the input string as JSON.
-    public func asJSON(allowFragments: Bool = false) -> ConversionStep<String, AnyObject> {
-        func convert(s: String, ctx: ConversionContext) -> ConversionResult<AnyObject, ExtractError> {
+    public func asJSON(_ allowFragments: Bool = false) -> ConversionStep<String, Any> {
+        func convert(_ s: String, ctx: ConversionContext) -> ConversionResult<Any> {
             do {
-                let opts: NSJSONReadingOptions = allowFragments ? [.AllowFragments] : []
-                let ob = try NSJSONSerialization.JSONObjectWithData(s.dataUsingEncoding(NSUTF8StringEncoding)!, options: opts)
-                return .Success(ob)
+                let opts: JSONSerialization.ReadingOptions = allowFragments ? [.allowFragments] : []
+                let ob = try JSONSerialization.jsonObject(with: s.data(using: String.Encoding.utf8)!, options: opts)
+                return .success(ob)
             } catch {
-                return .Failure(ctx.errorBuilder.fromError(error))
+                return .failure(ctx.errorBuilder.fromError(error))
             }
         }
         return ConversionStep(

@@ -164,9 +164,11 @@
 				TargetAttributes = {
 					CB4467E11C6A50CF00D49630 = {
 						CreatedOnToolsVersion = 7.2.1;
+						LastSwiftMigration = 0800;
 					};
 					CB4467EB1C6A50CF00D49630 = {
 						CreatedOnToolsVersion = 7.2.1;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -350,6 +352,7 @@
 				PRODUCT_NAME = Flue;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -369,6 +372,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.Flue;
 				PRODUCT_NAME = Flue;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -380,6 +384,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.FlueTests;
 				PRODUCT_NAME = FlueTests;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -391,6 +396,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = fi.juripakaste.FlueTests;
 				PRODUCT_NAME = FlueTests;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

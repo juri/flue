@@ -11,9 +11,9 @@ import Flue
 
 class FlueTests: XCTestCase {
     func testDF() {
-        let df = NSDateFormatter()
+        let df = DateFormatter()
         df.dateFormat = "H:mm"
-        let d = df.dateFromString("16:31")!
+        let d = df.date(from: "16:31")!
         print("d: ", d)
     }
 
@@ -30,18 +30,18 @@ class FlueTests: XCTestCase {
         XCTAssertNil(vp.extract("d").asInt().optional())
 
         do {
-            try vp.extract("zap").asInt().required()
+            let _ = try vp.extract("zap").asInt().required()
             XCTFail("Expected an exception")
-        } catch let ExtractError.ValueMissing(name, _) {
+        } catch let ExtractError.valueMissing(name, _) {
             XCTAssertEqual(name, "zap")
         } catch {
             XCTFail("Unexpected exception \(error)")
             return
         }
         do {
-            try vp.extract("asdf").asInt().range(10...20).required()
+            let _ = try vp.extract("asdf").asInt().range(10...20).required()
             XCTFail("Expected an exception")
-        } catch let ExtractError.IntNotInRange(name, value, range, _) {
+        } catch let ExtractError.intNotInRange(name, value, range, _) {
             XCTAssertEqual(name, "asdf")
             XCTAssertEqual(value, 1)
             XCTAssertEqual(range, 10...20)
@@ -53,7 +53,7 @@ class FlueTests: XCTestCase {
 
     func testValueReader_Numbers_With_Locale() {
         let env = ["i1": "1", "d1": "1.2345", "d2": "2,3456"]
-        let vp = DictParser(dict: env, valueParser: ValueParser(locale: NSLocale(localeIdentifier: "fi_FI")))
+        let vp = DictParser(dict: env, valueParser: ValueParser(locale: Locale(identifier: "fi_FI")))
         XCTAssertEqual(try! vp.extract("i1").asInt().required(), 1)
         XCTAssertNil(vp.extract("d1").asDouble().optional())
         XCTAssertEqualWithAccuracy(try! vp.extract("d2").asDouble().required(), 2.3456, accuracy: 0.00001)
@@ -84,8 +84,8 @@ class FlueTests: XCTestCase {
         XCTAssertFalse(try! vp.extract("8").asBool().required())
     }
 
-    func date(year: Int, _ month: Int, _ day: Int, _ hour: Int, _ minute: Int, _ second: Int, _ timeZone: NSTimeZone) -> NSDate {
-        let comps = NSDateComponents()
+    func date(_ year: Int, _ month: Int, _ day: Int, _ hour: Int, _ minute: Int, _ second: Int, _ timeZone: TimeZone) -> Date {
+        var comps = DateComponents()
         comps.year = year
         comps.month = month
         comps.day = day
@@ -93,24 +93,24 @@ class FlueTests: XCTestCase {
         comps.minute = minute
         comps.second = second
         comps.timeZone = timeZone
-        comps.calendar = NSCalendar(identifier: NSCalendarIdentifierGregorian)!
+        comps.calendar = Calendar(identifier: Calendar.Identifier.gregorian)
         return comps.date!
     }
 
     func testValueReader_Date() {
         let env = ["date1": "2016-03-21T17:33:00+02:00"]
         let dp = DictParser(dict: env)
-        let df = NSDateFormatter()
-        df.calendar = NSCalendar(identifier: NSCalendarIdentifierGregorian)!
+        let df = DateFormatter()
+        df.calendar = Calendar(identifier: Calendar.Identifier.gregorian)
         df.dateFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ssZZZZZ"
-        let tz = NSTimeZone(forSecondsFromGMT: 60 * 60 * 2)
+        let tz = TimeZone(secondsFromGMT: 60 * 60 * 2)!
         XCTAssertEqualWithAccuracy(try! dp.extract("date1").asDate(df).after(date(2016, 03, 21, 17, 32, 0, tz)).before(date(2016, 03, 21, 17, 34, 0, tz)).required().timeIntervalSinceReferenceDate, date(2016, 03, 21, 17, 33, 0, tz).timeIntervalSinceReferenceDate, accuracy: 1)
     }
 
     func testHelp() {
         let vp = DictParser(dict: ["q": "12"])
         XCTAssertEqual(vp.extract("a").asInt().usage(), ["a", "Integer"])
-        XCTAssertEqual(vp.extract("a").asInt().range(1...10).usage(), ["a", "Integer", "Range: 1..<11"])
+        XCTAssertEqual(vp.extract("a").asInt().range(1...10).usage(), ["a", "Integer", "Range: 1...10"])
         XCTAssertEqual(vp.extract("a").asBool().usage(), ["a", "Boolean: true if string starts with [YyTt1-9]"])
         XCTAssertEqual(vp.extract("a").asBool().addHelp("Usage string").usage(), ["a", "Boolean: true if string starts with [YyTt1-9]", "Usage string"])
         XCTAssertEqual(vp.extract("a").addHelp("Foo", prefix: true).usage(), ["Foo", "a"])
@@ -129,11 +129,11 @@ class FlueTests: XCTestCase {
 
     func testJSONWithFullConvert() {
         let vp = DictParser(dict: ["q": "{\"w\": 1}"])
-        func convert(v: AnyObject, ctx: ConversionContext) -> ConversionResult<[String: Int], ExtractError> {
+        func convert(_ v: Any, ctx: ConversionContext) -> ConversionResult<[String: Int]> {
             if let vd = v as? [String: Int] {
-                return .Success(vd)
+                return .success(vd)
             }
-            return .Failure(ExtractError.OtherError("Can't convert value \(v) to dict"))
+            return .failure(ExtractError.otherError("Can't convert value \(v) to dict"))
         }
         let j = try! vp.extract("q").asJSON().asType(convert, help: "plerp").required()
         XCTAssertEqual(j, ["w": 1])
@@ -141,7 +141,7 @@ class FlueTests: XCTestCase {
 
     func testJSONWithOptionalConvert() {
         let vp = DictParser(dict: ["q": "{\"w\": 1}"])
-        func convert(v: AnyObject, ctx: ConversionContext) -> [String: Int]? {
+        func convert(_ v: Any, ctx: ConversionContext) -> [String: Int]? {
             return v as? [String: Int]
         }
         let j = try! vp.extract("q").asJSON().asType(convert, help: "plerp").required()
@@ -150,13 +150,13 @@ class FlueTests: XCTestCase {
 
     func testJSONWithOptionalConvertFailure() {
         let vp = DictParser(dict: ["q": "{\"w\": \"e\"}"])
-        func convert(v: AnyObject, ctx: ConversionContext) -> [String: Int]? {
+        func convert(_ v: Any, ctx: ConversionContext) -> [String: Int]? {
             return v as? [String: Int]
         }
         do {
-            try vp.extract("q").asJSON().asType(convert).required()
+            let _ = try vp.extract("q").asJSON().asType(convert).required()
             XCTFail("Expected an exception")
-        } catch let ExtractError.BadFormat(name, value, expectType, _) {
+        } catch let ExtractError.badFormat(name, value, expectType, _) {
             XCTAssertEqual(name, "q")
             XCTAssertEqual(value, "{\"w\": \"e\"}")
             XCTAssertEqual(expectType, "Dictionary<String, Int>")
@@ -167,7 +167,7 @@ class FlueTests: XCTestCase {
 
     func testJSONWithOptionalConvertHelp() {
         let vp = DictParser(dict: ["q": "{\"w\": \"e\"}"])
-        func convert(v: AnyObject, ctx: ConversionContext) -> [String: Int]? {
+        func convert(_ v: Any, ctx: ConversionContext) -> [String: Int]? {
             return v as? [String: Int]
         }
         let help = vp.extract("q").asJSON().asType(convert).usage()
@@ -178,31 +178,35 @@ class FlueTests: XCTestCase {
         let vp = DictParser(dict: ["q": "wer"])
 
         switch vp.extract("q").minLength(1).readValue() {
-        case .Success(let v):
+        case .success(let v):
             XCTAssertEqual(v, "wer")
-        case .Failure(let e):
+        case .failure(let e):
             XCTFail("Unexpected error \(e)")
         }
 
         switch vp.extract("q").minLength(4).readValue() {
-        case .Success(let v):
+        case .success(let v):
             XCTFail("Unexpected success \(v)")
-        case .Failure(let e):
-            XCTAssertEqual(e, ExtractError.StringTooShort(name: "q", value: "wer", minLength: 4, localizedDescription: ""))
+        case .failure(let e as ExtractError):
+            XCTAssertEqual(e, ExtractError.stringTooShort(name: "q", value: "wer", minLength: 4, localizedDescription: ""))
+        case .failure(let e):
+            XCTFail("Unexpected error \(e)")
         }
 
         switch vp.extract("q").maxLength(4).readValue() {
-        case .Success(let v):
+        case .success(let v):
             XCTAssertEqual(v, "wer")
-        case .Failure(let e):
+        case .failure(let e):
             XCTFail("Unexpected error \(e)")
         }
 
         switch vp.extract("q").maxLength(2).readValue() {
-        case .Success(let v):
+        case .success(let v):
             XCTFail("Unexpected success \(v)")
-        case .Failure(let e):
-            XCTAssertEqual(e, ExtractError.StringTooLong(name: "q", value: "wer", maxLength: 2, localizedDescription: ""))
+        case .failure(let e as ExtractError):
+            XCTAssertEqual(e, ExtractError.stringTooLong(name: "q", value: "wer", maxLength: 2, localizedDescription: ""))
+        case .failure(let e):
+            XCTFail("Unexpected error \(e)")
         }
     }
 
@@ -210,17 +214,19 @@ class FlueTests: XCTestCase {
         let dp = DictParser(dict: ["q": "asdf"])
 
         switch dp.extract("q").regexp("a.*")!.readValue() {
-        case .Success(let v):
+        case .success(let v):
             XCTAssertEqual(v, "asdf")
-        case .Failure(let e):
+        case .failure(let e):
             XCTFail("Unexpected error \(e)")
         }
 
         switch dp.extract("q").regexp("b.*")!.readValue() {
-        case .Success(let v):
+        case .success(let v):
             XCTFail("Unexpected value \(v)")
-        case .Failure(let e):
-            XCTAssertEqual(e, ExtractError.NoRegexpMatch(name: "q", value: "asdf", regexp: "b.*", localizedDescription: ""))
+        case .failure(let e as ExtractError):
+            XCTAssertEqual(e, ExtractError.noRegexpMatch(name: "q", value: "asdf", regexp: "b.*", localizedDescription: ""))
+        case .failure(let e):
+            XCTFail("Unexpected error \(e)")
         }
     }
 }
