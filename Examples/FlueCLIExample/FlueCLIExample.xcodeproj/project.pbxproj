@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CB365E1F1D980C68000D848A /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = CB365E1E1D980C68000D848A /* README.md */; };
 		CB584AFB1CB551FB0003536B /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB584AFA1CB551FB0003536B /* main.swift */; };
 		CB584B0E1CB552530003536B /* Flue.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB584B0B1CB552530003536B /* Flue.swift */; };
 		CB584B0F1CB552530003536B /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB584B0C1CB552530003536B /* JSON.swift */; };
 		CB584B101CB552530003536B /* Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB584B0D1CB552530003536B /* Regex.swift */; };
+		CBBD73611D9D6B64007C7894 /* sectdata.m in Sources */ = {isa = PBXBuildFile; fileRef = CBBD73601D9D6B64007C7894 /* sectdata.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,12 +28,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CB365E1E1D980C68000D848A /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		CB584AF71CB551FB0003536B /* FlueCLIExample */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FlueCLIExample; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB584AFA1CB551FB0003536B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		CB584B0B1CB552530003536B /* Flue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Flue.swift; path = ../../Flue/Flue.swift; sourceTree = "<group>"; };
 		CB584B0C1CB552530003536B /* JSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = JSON.swift; path = ../../Flue/JSON.swift; sourceTree = "<group>"; };
 		CB584B0D1CB552530003536B /* Regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Regex.swift; path = ../../Flue/Regex.swift; sourceTree = "<group>"; };
 		CB584B111CB552680003536B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CBBD735E1D9D6AF5007C7894 /* sectdata.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sectdata.h; sourceTree = "<group>"; };
+		CBBD735F1D9D6B64007C7894 /* FlueCLIExample-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FlueCLIExample-Bridging-Header.h"; sourceTree = "<group>"; };
+		CBBD73601D9D6B64007C7894 /* sectdata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = sectdata.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +54,7 @@
 		CB584AEE1CB551FB0003536B = {
 			isa = PBXGroup;
 			children = (
+				CB365E1E1D980C68000D848A /* README.md */,
 				CB584B0A1CB552480003536B /* Flue */,
 				CB584AF91CB551FB0003536B /* FlueCLIExample */,
 				CB584AF81CB551FB0003536B /* Products */,
@@ -66,6 +73,9 @@
 			isa = PBXGroup;
 			children = (
 				CB584AFA1CB551FB0003536B /* main.swift */,
+				CBBD735E1D9D6AF5007C7894 /* sectdata.h */,
+				CBBD73601D9D6B64007C7894 /* sectdata.m */,
+				CBBD735F1D9D6B64007C7894 /* FlueCLIExample-Bridging-Header.h */,
 			);
 			path = FlueCLIExample;
 			sourceTree = "<group>";
@@ -113,6 +123,7 @@
 				TargetAttributes = {
 					CB584AF61CB551FB0003536B = {
 						CreatedOnToolsVersion = 7.3;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -140,6 +151,8 @@
 			files = (
 				CB584B0F1CB552530003536B /* JSON.swift in Sources */,
 				CB584B101CB552530003536B /* Regex.swift in Sources */,
+				CBBD73611D9D6B64007C7894 /* sectdata.m in Sources */,
+				CB365E1F1D980C68000D848A /* README.md in Sources */,
 				CB584AFB1CB551FB0003536B /* main.swift in Sources */,
 				CB584B0E1CB552530003536B /* Flue.swift in Sources */,
 			);
@@ -249,7 +262,9 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				OTHER_LDFLAGS = "-Wl,-sectcreate,__LOCALIZATIONS,__base,../../Flue/en.lproj/Localizable.strings,-segprot,__LOCALIZATIONS,r,r";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "FlueCLIExample/FlueCLIExample-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -260,6 +275,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				OTHER_LDFLAGS = "-Wl,-sectcreate,__LOCALIZATIONS,__base,../../Flue/en.lproj/Localizable.strings,-segprot,__LOCALIZATIONS,r,r";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "FlueCLIExample/FlueCLIExample-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
