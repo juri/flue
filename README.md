@@ -13,10 +13,13 @@ Flue is written in Swift 3.0. It requires Foundation. It has been tested on a Ma
 ## Example
 
 ```swift
+import Cocoa
+import Flue
+
 struct Settings {
     var debug: Bool
     var port: Int
-    var config: AnyObject
+    var config: Any
     var key: String
     var path: [String]
 }
@@ -27,7 +30,7 @@ enum SettingsOrError {
 }
 
 func formatHelp(parts: [String], nameWidth: Int) -> String {
-    return String(format: "%@ -- %@", parts[0].stringByPaddingToLength(nameWidth, withString: " ", startingAtIndex: 0), parts[1..<parts.count].joinWithSeparator(". "))
+    return String(format: "%@ -- %@", parts[0].padding(toLength: nameWidth, withPad: " ", startingAt: 0), parts[1..<parts.count].joined(separator: ". "))
 }
 
 func readSettings(env: [String: String]) -> (SettingsOrError, String) {
@@ -38,13 +41,13 @@ func readSettings(env: [String: String]) -> (SettingsOrError, String) {
     let portExtract = dp.extract("PORT").asInt()
     let configExtract = dp.extract("CONFIG").asJSON()
     let keyExtract = dp.extract("KEY").minLength(6).addHelp("Encryption key.", prefix: false)
-    let pathExtract = dp.extract("PATH").asType({ val, ctx in val.componentsSeparatedByString(":") }, help: "String with components separated by :")
+    let pathExtract = dp.extract("PATH").asType({ val, ctx in val.components(separatedBy: ":") }, help: "String with components separated by :")
 
     let usageProviders: [UsageProvider] = [debugExtract, portExtract, configExtract, keyExtract, pathExtract]
 
     let helps = usageProviders.map { $0.usage() }
     let maxNameWidth = helps.reduce(0) { max($0, $1[0].characters.count) }
-    let help = helps.map({ formatHelp($0, nameWidth: maxNameWidth) }).joinWithSeparator("\n")
+    let help = helps.map({ formatHelp(parts: $0, nameWidth: maxNameWidth) }).joined(separator: "\n")
 
     do {
         return (.Success(Settings(
@@ -53,15 +56,15 @@ func readSettings(env: [String: String]) -> (SettingsOrError, String) {
             config: try configExtract.required(),
             key: try keyExtract.required(),
             path: try pathExtract.required()
-            )), help)
+        )), help)
     } catch {
-        return (.Error(String(error)), help)
+        return (.Error(String(describing: error)), help)
     }
 }
 
 func readExample() {
-    let env = ["DEBUG": "yes", "PORT": "42158", "CONFIG": "{\"asdf\": \"bar\"}", "KEY": "qwertyui", "PATH": NSProcessInfo.processInfo().environment["PATH"]!]
-    let (res, help) = readSettings(env)
+    let env = ["DEBUG": "yes", "PORT": "42158", "CONFIG": "{\"asdf\": \"bar\"}", "KEY": "qwertyui", "PATH": ProcessInfo.processInfo.environment["PATH"]!]
+    let (res, help) = readSettings(env: env)
     print("help: \(help)")
     print("res: \(res)")
 }
