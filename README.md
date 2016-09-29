@@ -8,7 +8,7 @@ Flue supports both unnamed values and named values source like the environment.
 
 ## Requirements
 
-Flue is written in Swift 2.2. It requires Foundation. It has been tested on a Mac with Xcode 7.3.
+Flue is written in Swift 3.0. It requires Foundation. It has been tested on a Mac with Xcode 8.0.
 
 ## Example
 
