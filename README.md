@@ -12,6 +12,8 @@ Flue is written in Swift 3.0. It requires Foundation. It has been tested on a Ma
 
 ## Example
 
+This code is from `Example.playground`:
+
 ```swift
 import Cocoa
 import Flue
@@ -25,32 +27,28 @@ struct Settings {
 }
 
 enum SettingsOrError {
-    case Success(Settings)
-    case Error(String)
-}
-
-func formatHelp(parts: [String], nameWidth: Int) -> String {
-    return String(format: "%@ -- %@", parts[0].padding(toLength: nameWidth, withPad: " ", startingAt: 0), parts[1..<parts.count].joined(separator: ". "))
+    case success(Settings)
+    case error(String)
 }
 
 func readSettings(env: [String: String]) -> (SettingsOrError, String) {
     let vp = Flue.ValueParser()
     let dp = Flue.DictParser(dict: env, valueParser: vp)
 
-    let debugExtract = dp.extract("DEBUG").asBool()
-    let portExtract = dp.extract("PORT").asInt()
-    let configExtract = dp.extract("CONFIG").asJSON()
-    let keyExtract = dp.extract("KEY").minLength(6).addHelp("Encryption key.", prefix: false)
-    let pathExtract = dp.extract("PATH").asType({ val, ctx in val.components(separatedBy: ":") }, help: "String with components separated by :")
+    let conversions = Flue.Conversions()
 
-    let usageProviders: [UsageProvider] = [debugExtract, portExtract, configExtract, keyExtract, pathExtract]
+    let debugExtract = conversions.add(dp.extract("DEBUG").asBool())
+    let portExtract = conversions.add(dp.extract("PORT").asInt())
+    let configExtract = conversions.add(dp.extract("CONFIG").asJSON())
+    let keyExtract = conversions.add(dp.extract("KEY").minLength(6).addHelp("Encryption key.", prefix: false))
+    let pathExtract = conversions.add(dp.extract("PATH").asType({ val, ctx in val.components(separatedBy: ":") }, help: "String with components separated by :"))
 
-    let helps = usageProviders.map { $0.usage() }
+    let helps = conversions.usage()
     let maxNameWidth = helps.reduce(0) { max($0, $1[0].characters.count) }
     let help = helps.map({ formatHelp(parts: $0, nameWidth: maxNameWidth) }).joined(separator: "\n")
 
     do {
-        return (.Success(Settings(
+        return (.success(Settings(
             debug: try debugExtract.required(),
             port: try portExtract.required(),
             config: try configExtract.required(),
@@ -58,27 +56,50 @@ func readSettings(env: [String: String]) -> (SettingsOrError, String) {
             path: try pathExtract.required()
         )), help)
     } catch {
-        return (.Error(String(describing: error)), help)
+        return (.error(conversions.errors().map { String(describing: $0) }.joined(separator: ", ")), help)
+    }
+}
+
+func readEnv(env: [String: String]) {
+    let (res, help) = readSettings(env: env)
+    print("Read from environment:")
+    print("help: \(help)")
+    switch res {
+    case let .success(s): print("Settings: \(s)")
+    case let .error(e): print("Error: \(e)")
     }
 }
 
 func readExample() {
-    let env = ["DEBUG": "yes", "PORT": "42158", "CONFIG": "{\"asdf\": \"bar\"}", "KEY": "qwertyui", "PATH": ProcessInfo.processInfo.environment["PATH"]!]
-    let (res, help) = readSettings(env: env)
-    print("help: \(help)")
-    print("res: \(res)")
+    readEnv(env: ["DEBUG": "yes", "PORT": "42158", "CONFIG": "{\"asdf\": \"bar\"}", "KEY": "qwertyui", "PATH": ProcessInfo.processInfo.environment["PATH"]!])
+    readEnv(env: [:])
+}
+
+func formatHelp(parts: [String], nameWidth: Int) -> String {
+    return String(format: "%@ -- %@", parts[0].padding(toLength: nameWidth, withPad: " ", startingAt: 0), parts[1..<parts.count].joined(separator: ". "))
 }
 ```
 
-You'll get parsed values in the Settings object and a help string that looks like this:
+Calling `readExample()` will get you output like this:
 
 
 ```
-DEBUG  -- Boolean: true if string starts with [YyTt1-9]
+Read from environment:
+help: DEBUG  -- Boolean: true if string starts with [YyTt1-9]
 PORT   -- Integer
 CONFIG -- JSON Data
 KEY    -- Minimum length: 6. Encryption key.
 PATH   -- String with components separated by :
+Settings: Settings(debug: true, port: 42158, config: {
+    asdf = bar;
+}, key: "qwertyui", path: ["/usr/bin", "/bin", "/usr/sbin", "/sbin"])
+Read from environment:
+help: DEBUG  -- Boolean: true if string starts with [YyTt1-9]
+PORT   -- Integer
+CONFIG -- JSON Data
+KEY    -- Minimum length: 6. Encryption key.
+PATH   -- String with components separated by :
+Error: Required value DEBUG wasn't found, Required value PORT wasn't found, Required value CONFIG wasn't found, Required value KEY wasn't found, Required value PATH wasn't found
 ```
 
 ## Localization
