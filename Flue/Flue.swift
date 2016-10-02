@@ -11,7 +11,7 @@ import Foundation
 /**
  ValueParser is the starting point for extracting data from input.
  */
-open class ValueParser {
+public class ValueParser {
     fileprivate let integerFormatter: NumberFormatter
     fileprivate let floatFormatter: NumberFormatter
     fileprivate let dateFormatter: DateFormatter
@@ -40,7 +40,7 @@ open class ValueParser {
     }
 
     /// Returns an ConversionStep object with a String result
-    open func extract(_ value: String?, name: String? = nil) -> ConversionStep<String, String> {
+    public func extract(_ value: String?, name: String? = nil) -> ConversionStep<String, String> {
         let errorBuilder = ErrorBuilder(integerFormatter: self.integerFormatter, floatFormatter: self.floatFormatter, dateFormatter: self.dateFormatter, stringLoader: self.stringLoader)
 
         func readValue() -> ConversionResult<String> {
@@ -77,16 +77,16 @@ public func stringBundleLoader(_ bundle: Bundle = flueBundle()) -> StringLoader 
 /**
  DictParser extracts values from a [String: String] dictionary.
  */
-open class DictParser {
-    fileprivate let dict: [String: String]
-    open let vp: ValueParser
+public class DictParser {
+    private let dict: [String: String]
+    public let vp: ValueParser
 
     public init(dict: [String: String], valueParser: ValueParser = ValueParser()) {
         self.dict = dict
         self.vp = valueParser
     }
 
-    open func extract(_ key: String) -> ConversionStep<String,String> {
+    public func extract(_ key: String) -> ConversionStep<String,String> {
         return self.vp.extract(self.dict[key], name: key)
     }
 }
@@ -123,10 +123,17 @@ public class Conversions {
 }
 
 internal struct ErrorBuilder {
-    fileprivate let integerFormatter: NumberFormatter
-    fileprivate let floatFormatter: NumberFormatter
-    fileprivate let dateFormatter: DateFormatter
-    fileprivate let stringLoader: StringLoader
+    private let integerFormatter: NumberFormatter
+    private let floatFormatter: NumberFormatter
+    private let dateFormatter: DateFormatter
+    private let stringLoader: StringLoader
+
+    internal init(integerFormatter: NumberFormatter, floatFormatter: NumberFormatter, dateFormatter: DateFormatter, stringLoader: @escaping StringLoader) {
+        self.integerFormatter = integerFormatter
+        self.floatFormatter = floatFormatter
+        self.dateFormatter = dateFormatter
+        self.stringLoader = stringLoader
+    }
 
     internal func valueMissing(_ name: String?) -> ExtractError {
         let desc: String
