@@ -91,6 +91,37 @@ open class DictParser {
     }
 }
 
+/**
+ ConversionInfoProvider gives interface to the usage strings and error info
+ of a conversion.
+ */
+public protocol ConversionInfoProvider {
+    func usage() -> [String]
+    func error() -> Error?
+}
+
+/**
+ Conversions collects usage info and errors from multiple ValueParser calls.
+ */
+public class Conversions {
+    private var conversions: [ConversionInfoProvider] = []
+
+    public init() {}
+
+    public func add<A, B>(_ conversion: ConversionStep<A, B>) -> ConversionStep<A, B> {
+        self.conversions.append(conversion)
+        return conversion
+    }
+
+    public func usage() -> [[String]] {
+        return conversions.map { $0.usage() }
+    }
+
+    public func errors() -> [Error] {
+        return conversions.flatMap { $0.error() }
+    }
+}
+
 internal struct ErrorBuilder {
     fileprivate let integerFormatter: NumberFormatter
     fileprivate let floatFormatter: NumberFormatter
@@ -381,6 +412,13 @@ public func ==(ee1: ExtractError, ee2: ExtractError) -> Bool {
 public enum ConversionResult<T> {
     case success(T)
     case failure(Error)
+
+    var error: Error? {
+        switch self {
+        case .success(_): return nil
+        case .failure(let e): return e
+        }
+    }
 }
 
 /**
@@ -410,7 +448,7 @@ public struct ConversionContext {
  - `convert` converts the value from `input` to the next type.
  - `help` returns the current array of help messages.
  */
-public struct ConversionStep<Input, Output>: ConversionStepProtocol, UsageProvider {
+public struct ConversionStep<Input, Output>: ConversionStepProtocol, ConversionInfoProvider {
     public let input: () -> ConversionResult<Input>
     public let convert: (Input, ConversionContext) -> ConversionResult<Output>
     public let help: (ConversionContext) -> [String]
@@ -453,6 +491,11 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol, UsageProvid
         }
     }
 
+    /// Returns the error if there was a failure or nil
+    public func error() -> Error? {
+        return self.readValue().error
+    }
+
     /// Adds a string to the help array. The addition can be placed either before or after 
     /// the previous entry.
     public func addHelp(_ s: String, prefix: Bool = false) -> ConversionStep<Input, Output> {
@@ -473,13 +516,6 @@ public struct ConversionStep<Input, Output>: ConversionStepProtocol, UsageProvid
     public func usage() -> [String] {
         return self.help(self.context)
     }
-}
-
-/// UsageProviders provide an `usage` method. It makes it easier to deal with a collection
-/// of `ConversionStep`s when collecting their help messages.
-public protocol UsageProvider {
-    /// Returns the current help array.
-    func usage() -> [String]
 }
 
 /**
